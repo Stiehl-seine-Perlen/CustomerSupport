@@ -3,11 +3,10 @@ package de.benevolo.customer.support.entities;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -15,17 +14,18 @@ import java.util.Set;
 public class SupportIssue {
 
     @Id
+    @GeneratedValue
     private Long id;
 
-    @NotNull
+    @NotBlank
     private String title;
 
-    @NotNull
+    @NotBlank
     @Email
     private String issuerEmailAddress;
 
-    @OneToMany(mappedBy = "issue")
-    private Set<SupportIssueMessage> messages;
+    @OneToMany(mappedBy = "issue", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SupportIssueMessage> messages = new HashSet<>();
 
     protected SupportIssue() {
     }
@@ -74,6 +74,11 @@ public class SupportIssue {
         this.messages = messages;
     }
 
+    public void addMessage(final SupportIssueMessage message) {
+        messages.add(message);
+        message.setIssue(this);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -84,6 +89,16 @@ public class SupportIssue {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, issuerEmailAddress, messages);
+        return Objects.hash(id, title, issuerEmailAddress);
+    }
+
+    @Override
+    public String toString() {
+        return "SupportIssue{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", issuerEmailAddress='" + issuerEmailAddress + '\'' +
+                ", messages=" + messages +
+                '}';
     }
 }

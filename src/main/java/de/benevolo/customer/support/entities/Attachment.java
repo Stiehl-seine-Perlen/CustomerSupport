@@ -24,7 +24,7 @@ public class Attachment {
 
     @NotBlank
     private String filename;
-    
+
     @ManyToOne
     @JoinColumn(name = "messageId", nullable = false)
     private SupportIssueMessage message;
@@ -78,5 +78,15 @@ public class Attachment {
         int result = Objects.hash(id, filename);
         result = 31 * result + Arrays.hashCode(content);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Attachment{" +
+                "id=" + id +
+                ", content=" + Arrays.toString(content) +
+                ", filename='" + filename + '\'' +
+                ", message=" + message +
+                '}';
     }
 }

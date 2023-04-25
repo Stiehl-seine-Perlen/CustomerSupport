@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -20,6 +21,7 @@ import java.util.Set;
 public class SupportIssueMessage {
 
     @Id
+    @GeneratedValue
     private Long id;
 
     @NotBlank(message = "message must not be blank")
@@ -28,13 +30,12 @@ public class SupportIssueMessage {
     @NotNull(message = "isFromCustomer must not be null")
     private Boolean isFromCustomer;
 
-    @NotNull(message = "set of attachments is missing")
     @OneToMany(mappedBy = "message")
-    private Set<Attachment> attachments;
+    private Set<Attachment> attachments = new HashSet<>();
 
-    @NotNull(message = "issue is null, but message needs an issue")
-    @ManyToOne
-    @JoinColumn(name = "issueId", nullable = false)
+    // @NotNull(message = "issue is null, but message needs an issue")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "issue_id", nullable = false)
     private SupportIssue issue;
 
     @JsonCreator
@@ -47,6 +48,7 @@ public class SupportIssueMessage {
     }
 
     protected SupportIssueMessage() {
+
     }
 
     public String getMessage() {
@@ -99,6 +101,17 @@ public class SupportIssueMessage {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, message, isFromCustomer, attachments, issue);
+        return Objects.hash(id, message, isFromCustomer, attachments);
+    }
+
+    @Override
+    public String toString() {
+        return "SupportIssueMessage{" +
+                "id=" + id +
+                ", message='" + message + '\'' +
+                ", isFromCustomer=" + isFromCustomer +
+                ", attachments=" + attachments +
+                ", issueId=" + issue.getId() +
+                '}';
     }
 }
