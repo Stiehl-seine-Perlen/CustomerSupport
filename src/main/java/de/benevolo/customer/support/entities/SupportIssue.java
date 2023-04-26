@@ -24,7 +24,7 @@ public class SupportIssue {
     @Email
     private String issuerEmailAddress;
 
-    @OneToMany(mappedBy = "issue", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "issue", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<SupportIssueMessage> messages = new HashSet<>();
 
     protected SupportIssue() {

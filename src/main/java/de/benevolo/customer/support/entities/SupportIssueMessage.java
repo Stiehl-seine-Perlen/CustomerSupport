@@ -30,7 +30,7 @@ public class SupportIssueMessage {
     @NotNull(message = "isFromCustomer must not be null")
     private Boolean isFromCustomer;
 
-    @OneToMany(mappedBy = "message")
+    @OneToMany(mappedBy = "message", fetch = FetchType.LAZY)
     private Set<Attachment> attachments = new HashSet<>();
 
     // @NotNull(message = "issue is null, but message needs an issue")
@@ -89,6 +89,11 @@ public class SupportIssueMessage {
 
     public void setIssue(final SupportIssue issue) {
         this.issue = issue;
+    }
+
+    public void addAttachment(final Attachment attachment) {
+        attachments.add(attachment);
+        attachment.setMessage(this);
     }
 
     @Override

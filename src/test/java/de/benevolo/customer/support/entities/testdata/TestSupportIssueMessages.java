@@ -1,4 +1,4 @@
-package de.benevolo.customer.support.entities.testData;
+package de.benevolo.customer.support.entities.testdata;
 
 import de.benevolo.customer.support.entities.SupportIssueMessage;
 

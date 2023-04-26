@@ -2,8 +2,9 @@ package de.benevolo.customer.support.entities;
 
 import de.benevolo.customer.support.database.SupportIssueMessageRepository;
 import de.benevolo.customer.support.database.SupportIssueRepository;
-import de.benevolo.customer.support.entities.testData.TestSupportIssueMessages;
-import de.benevolo.customer.support.entities.testData.TestSupportIssues;
+import de.benevolo.customer.support.entities.testdata.TestAttachments;
+import de.benevolo.customer.support.entities.testdata.TestSupportIssueMessages;
+import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -97,8 +98,44 @@ public class SupportIssueMessageTest {
         // pass message instance to the entity manager
         messageRepository.persist(originalMessage);
 
-        // execute database operations
+        // execute database operations (should fail)
         Assertions.assertThrows(Exception.class, () -> entityManager.flush());
     }
 
+    @Test
+    @DisplayName("testing relation to attachments")
+    @Transactional
+    public void changeMessageAttachments() {
+        final SupportIssueMessage originalMessage = TestSupportIssueMessages.getRandomValid();
+
+        // attach to issue parent
+        final SupportIssue currentIssue = issueRepository.findById(currentSupportIssueId);
+        currentIssue.addMessage(originalMessage);
+
+        // add attachments to message
+        final int attachmentCount = 5;
+        for (int i = 0; i < 5; i++) {
+            final Attachment attachment = TestAttachments.getRandomValid();
+            originalMessage.addAttachment(attachment);
+        }
+
+        messageRepository.persist(originalMessage);
+
+        // write all entities to database
+        entityManager.flush();
+
+        // fetch created message again
+        SupportIssueMessage persistedMessage = messageRepository.findById(originalMessage.getId());
+        Assertions.assertEquals(attachmentCount, persistedMessage.getAttachments().size());
+
+        // add another attachment
+        final Attachment attachment = TestAttachments.getRandomValid();
+        persistedMessage.addAttachment(attachment);
+
+        // write to database
+        entityManager.flush();
+
+        persistedMessage = messageRepository.findById(originalMessage.getId());
+        Assertions.assertEquals(attachmentCount + 1, persistedMessage.getAttachments().size());
+    }
 }

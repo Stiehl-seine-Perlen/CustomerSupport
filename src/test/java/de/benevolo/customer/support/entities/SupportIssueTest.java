@@ -1,7 +1,8 @@
 package de.benevolo.customer.support.entities;
 
 import de.benevolo.customer.support.database.SupportIssueRepository;
-import de.benevolo.customer.support.entities.testData.TestSupportIssues;
+import de.benevolo.customer.support.entities.testdata.TestSupportIssueMessages;
+import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -23,6 +25,9 @@ public class SupportIssueTest {
 
     @Inject
     Validator validator;
+
+    @Inject
+    EntityManager entityManager;
 
     @BeforeEach
     @Transactional
@@ -94,6 +99,31 @@ public class SupportIssueTest {
     @DisplayName("test update messages of issue")
     @Transactional
     public void updateMessagesOfIssue() {
+
+        // build an issue with messages in it
+        final SupportIssue originalIssue = TestSupportIssues.getRandomValid();
+        final int messageCount = 5;
+        for (int i = 0; i < messageCount; i++) {
+            final SupportIssueMessage message = TestSupportIssueMessages.getRandomValid();
+            originalIssue.addMessage(message);
+        }
+
+        issueRepository.persist(originalIssue);
+
+        // store original issue incl. message to database
+        entityManager.flush();
+
+        // modify the messages of the issue
+        final SupportIssue fetchedIssue = issueRepository.findById(originalIssue.getId());
+        Assertions.assertEquals(messageCount, fetchedIssue.getMessages().size());
+        fetchedIssue.addMessage(TestSupportIssueMessages.getRandomValid());
+
+        // store new issue incl. messages to database
+        entityManager.flush();
+
+        // check if changes have been persisted on database correctly
+        final SupportIssue modifiedIssue = issueRepository.findById(originalIssue.getId());
+        Assertions.assertEquals(messageCount + 1, modifiedIssue.getMessages().size());
     }
 
 }
