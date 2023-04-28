@@ -2,6 +2,8 @@ package de.benevolo.customer.support.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -31,6 +33,7 @@ public class SupportIssueMessage {
     private Boolean isFromCustomer;
 
     @OneToMany(mappedBy = "message", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Attachment> attachments = new HashSet<>();
 
     // @NotNull(message = "issue is null, but message needs an issue")

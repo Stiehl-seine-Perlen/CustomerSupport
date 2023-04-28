@@ -2,6 +2,8 @@ package de.benevolo.customer.support.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -29,7 +31,8 @@ public class SupportIssue {
     @Enumerated(EnumType.STRING)
     private SupportIssueStatus status;
 
-    @OneToMany(mappedBy = "issue", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "issue", orphanRemoval = true, fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<SupportIssueMessage> messages = new HashSet<>();
 
     protected SupportIssue() {
