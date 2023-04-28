@@ -44,6 +44,7 @@ public class SupportIssueMessage {
                                @JsonProperty(required = true) final Set<Attachment> attachments) {
         this.message = message;
         this.isFromCustomer = isFromCustomer;
+        attachments.forEach(this::addAttachment);
         this.attachments = attachments;
     }
 

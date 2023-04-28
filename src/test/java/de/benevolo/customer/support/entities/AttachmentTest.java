@@ -88,14 +88,17 @@ public class AttachmentTest {
     }
 
     @Test
-    @DisplayName("attempt creation of attachments without message")
+    @DisplayName("test creation of attachments without message")
     @Transactional
     public void createWithoutMessage() {
         final Attachment originalAttachment = TestAttachments.getRandomValid();
 
         entityManager.persist(originalAttachment);
 
-        Assertions.assertThrows(Exception.class, () -> entityManager.flush());
+        entityManager.flush();
+
+        final Attachment persistedAttachment = attachmentRepository.findById(originalAttachment.getId());
+        Assertions.assertEquals(originalAttachment, persistedAttachment);
     }
 
 }

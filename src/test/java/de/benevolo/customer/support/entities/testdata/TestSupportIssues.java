@@ -49,6 +49,19 @@ public class TestSupportIssues {
     }
 
     /**
+     * Generates a random valid {@link SupportIssue} for testing issues.
+     *
+     * @return valid entity that should pass validation checks
+     * @author Daniel Mehlber
+     */
+    public static SupportIssue getRandomInvalid() {
+        final String title = invalidTitles[new Random().nextInt(invalidTitles.length)];
+        final String email = invalidEmails[new Random().nextInt(invalidEmails.length)];
+
+        return new SupportIssue(title, email);
+    }
+
+    /**
      * Returns all invalid entity combinations of {@link SupportIssue}. These issues should not pass validation checks.
      *
      * @return list of invalid {@link SupportIssue} entities

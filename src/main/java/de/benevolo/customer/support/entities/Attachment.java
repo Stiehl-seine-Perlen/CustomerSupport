@@ -18,7 +18,7 @@ public class Attachment {
     private String filename;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "messageId", nullable = false)
+    @JoinColumn(name = "messageId")
     private SupportIssueMessage message;
 
     @JsonCreator

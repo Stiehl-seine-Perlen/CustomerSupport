@@ -29,11 +29,17 @@ public class TestSupportIssueMessages {
         return new SupportIssueMessage(message, isFromCustomer, new HashSet<>());
     }
 
+    public static SupportIssueMessage getRandomInvalid() {
+        final String message = invalidMessages[new Random().nextInt(invalidMessages.length)];
+        final boolean isFromCustomer = new Random().nextBoolean();
+        return new SupportIssueMessage(message, isFromCustomer, new HashSet<>());
+    }
+
     public static List<SupportIssueMessage> getAllValidCombinations() {
         final List<SupportIssueMessage> messages = new LinkedList<>();
 
         for (final String validMessageContent : validMessages) {
-            final SupportIssueMessage validMessage = new SupportIssueMessage(validMessageContent, new Random().nextBoolean(), null);
+            final SupportIssueMessage validMessage = new SupportIssueMessage(validMessageContent, new Random().nextBoolean(), new HashSet<>());
         }
 
         return messages;
@@ -43,7 +49,7 @@ public class TestSupportIssueMessages {
         final List<SupportIssueMessage> messages = new LinkedList<>();
 
         for (final String invalidMessageContent : invalidMessages) {
-            final SupportIssueMessage invalidMessage = new SupportIssueMessage(invalidMessageContent, new Random().nextBoolean(), null);
+            final SupportIssueMessage invalidMessage = new SupportIssueMessage(invalidMessageContent, new Random().nextBoolean(), new HashSet<>());
         }
 
         return messages;
