@@ -1,6 +1,7 @@
 package de.benevolo.customer.support.entities.testdata;
 
 import de.benevolo.customer.support.entities.SupportIssue;
+import de.benevolo.customer.support.entities.SupportIssueStatus;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -45,7 +46,7 @@ public class TestSupportIssues {
         final String title = validTitles[new Random().nextInt(validTitles.length)];
         final String email = validEmails[new Random().nextInt(validEmails.length)];
 
-        return new SupportIssue(title, email);
+        return new SupportIssue(title, email, SupportIssueStatus.OPEN);
     }
 
     /**
@@ -58,7 +59,7 @@ public class TestSupportIssues {
         final String title = invalidTitles[new Random().nextInt(invalidTitles.length)];
         final String email = invalidEmails[new Random().nextInt(invalidEmails.length)];
 
-        return new SupportIssue(title, email);
+        return new SupportIssue(title, email, SupportIssueStatus.OPEN);
     }
 
     /**
@@ -98,7 +99,7 @@ public class TestSupportIssues {
 
         for (final String validTitle : validTitles) {
             for (final String validEmail : validEmails) {
-                final SupportIssue validIssue = new SupportIssue(validTitle, validEmail);
+                final SupportIssue validIssue = new SupportIssue(validTitle, validEmail, SupportIssueStatus.OPEN);
                 validIssues.add(validIssue);
             }
         }

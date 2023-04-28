@@ -4,10 +4,7 @@ package de.benevolo.customer.support.services;
 import de.benevolo.customer.support.database.AttachmentRepository;
 import de.benevolo.customer.support.database.SupportIssueMessageRepository;
 import de.benevolo.customer.support.database.SupportIssueRepository;
-import de.benevolo.customer.support.entities.Attachment;
-import de.benevolo.customer.support.entities.SupportIssue;
-import de.benevolo.customer.support.entities.SupportIssueMessage;
-import de.benevolo.customer.support.entities.SupportRequest;
+import de.benevolo.customer.support.entities.*;
 import de.benevolo.customer.support.entities.testdata.TestAttachments;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssueMessages;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
@@ -82,6 +79,7 @@ public class PrepareIssueServiceTest {
         Assertions.assertNotNull(persistedIssue);
         Assertions.assertEquals(someIssue.getTitle(), persistedIssue.getTitle(), "incorrect title persisted");
         Assertions.assertEquals(someIssue.getIssuerEmailAddress(), persistedIssue.getIssuerEmailAddress(), "incorrect email persisted");
+        Assertions.assertEquals(SupportIssueStatus.OPEN, persistedIssue.getStatus());
 
         final Set<SupportIssueMessage> persistedMessages = persistedIssue.getMessages();
         Assertions.assertNotNull(persistedMessages, "set of messages was null");
