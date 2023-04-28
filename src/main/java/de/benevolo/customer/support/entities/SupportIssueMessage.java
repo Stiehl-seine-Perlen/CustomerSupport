@@ -35,7 +35,7 @@ public class SupportIssueMessage {
 
     // @NotNull(message = "issue is null, but message needs an issue")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "issue_id", nullable = false)
+    @JoinColumn(nullable = false)
     private SupportIssue issue;
 
     @JsonCreator
