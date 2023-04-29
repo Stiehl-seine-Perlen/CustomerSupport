@@ -87,4 +87,11 @@ public class PrepareIssueService {
         return attachments;
     }
 
+    public String generateCustomerNotificationEmail(final SupportRequest request) {
+        return String.format("we will work on your request with title '%s'", request.getTitle());
+    }
+
+    public String generateSupportTeamNotification(final SupportRequest request) {
+        return String.format("we have a new issue named '%s'", request.getTitle());
+    }
 }

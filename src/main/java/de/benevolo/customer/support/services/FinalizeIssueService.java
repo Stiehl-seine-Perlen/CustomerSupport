@@ -30,4 +30,8 @@ public class FinalizeIssueService {
         issue.setStatus(SupportIssueStatus.CLOSED);
     }
 
+    public String generateCustomerConfirmation(final Long issueId) {
+        return String.format("the issue with id:%d was closed. Thanks you for using Benevolo!", issueId);
+    }
+
 }
