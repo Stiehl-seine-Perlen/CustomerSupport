@@ -2,6 +2,7 @@ package de.benevolo.customer.support.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -15,13 +16,16 @@ import java.util.UUID;
 public class SupportRequest {
 
     @NotBlank(message = "title must not be empty")
+    @Schema(example = "Schon wieder ein Bug")
     private String title;
 
     @NotBlank(message = "summary must not be empty")
+    @Schema(example = "Ich habe schon wieder einen Bug gefunden. Was könnt ihr eigentlich?")
     private String message;
 
     @NotBlank(message = "the issuers email address may not be blank")
     @Email(message = "the issuers email address must be a valid email address")
+    @Schema(example = "annoying-customer@idc.com")
     private String issuerEmailAddress;
 
     @NotNull(message = "attachments may be empty, but not null")
