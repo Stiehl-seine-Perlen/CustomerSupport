@@ -18,7 +18,7 @@ import javax.ws.rs.core.Response;
 import java.util.UUID;
 
 @Path("support/attachment/")
-public class AttachmentApi {
+public class AttachmentResource {
 
     @Inject
     AttachmentRepository attachmentRepository;

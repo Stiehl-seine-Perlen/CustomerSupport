@@ -1,6 +1,7 @@
 package de.benevolo.customer.support.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -39,6 +40,7 @@ public class SupportIssueMessage {
     // @NotNull(message = "issue is null, but message needs an issue")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
+    @JsonIgnore
     private SupportIssue issue;
 
     @JsonCreator
@@ -120,7 +122,6 @@ public class SupportIssueMessage {
                 ", message='" + message + '\'' +
                 ", isFromCustomer=" + isFromCustomer +
                 ", attachments=" + attachments +
-                ", issueId=" + issue.getId() +
                 '}';
     }
 }

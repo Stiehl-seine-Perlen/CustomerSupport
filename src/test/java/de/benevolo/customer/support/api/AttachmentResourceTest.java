@@ -24,7 +24,7 @@ import java.util.UUID;
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
-public class AttachmentApiTest {
+public class AttachmentResourceTest {
 
     @Inject
     AttachmentRepository attachmentRepository;
