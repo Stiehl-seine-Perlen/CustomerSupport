@@ -9,9 +9,9 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 public class SupportIssue {
@@ -33,7 +33,7 @@ public class SupportIssue {
 
     @OneToMany(mappedBy = "issue", orphanRemoval = true, fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<SupportIssueMessage> messages = new HashSet<>();
+    private List<SupportIssueMessage> messages = new LinkedList<>();
 
     protected SupportIssue() {
     }
@@ -77,11 +77,11 @@ public class SupportIssue {
         this.issuerEmailAddress = issuerEmailAddress;
     }
 
-    public Set<SupportIssueMessage> getMessages() {
+    public List<SupportIssueMessage> getMessages() {
         return messages;
     }
 
-    public void setMessages(final Set<SupportIssueMessage> messages) {
+    public void setMessages(final List<SupportIssueMessage> messages) {
         this.messages = messages;
     }
 

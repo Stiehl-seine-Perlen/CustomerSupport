@@ -20,6 +20,7 @@ public class FinalizeIssueServiceTest {
     @Inject
     SupportIssueRepository issueRepository;
 
+
     @Inject
     EntityManager entityManager;
 

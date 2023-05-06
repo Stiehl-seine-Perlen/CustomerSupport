@@ -55,7 +55,7 @@ public class PrepareIssueService {
         final Set<Attachment> firstMessageAttachments = fetchAttachmentsByIds(request.getAttachmentsIds());
 
         // create the first message of the issue using attachments and the request message
-        final SupportIssueMessage firstMessage = new SupportIssueMessage(request.getMessage(), true, firstMessageAttachments);
+        final SupportIssueMessage firstMessage = new SupportIssueMessage(request.getMessage(), true, firstMessageAttachments, false);
         log.debugf("created first support issue message with %d attachments", firstMessageAttachments.size());
 
         // attach first message to new issue

@@ -8,9 +8,7 @@ import de.benevolo.customer.support.entities.testdata.TestAttachments;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssueMessages;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.kie.kogito.Model;
 import org.kie.kogito.process.Process;
 import org.kie.kogito.process.ProcessInstance;
@@ -61,6 +59,14 @@ public class CustomerSupportProcessTest {
         }
     }
 
+    @AfterEach
+    @Transactional
+    public void cleanUp() {
+        attachmentRepository.deleteAll();
+        issueRepository.deleteAll();
+        messageRepository.deleteAll();
+    }
+
     private Map<String, Object> generateValidParameters() {
         final SupportIssue issue = TestSupportIssues.getRandomValid();
         final SupportIssueMessage message = TestSupportIssueMessages.getRandomValid();
@@ -88,21 +94,26 @@ public class CustomerSupportProcessTest {
     }
 
     @Test
+    @DisplayName("the happy path should work")
     @Transactional
     public void happyPath() {
-        final ProcessInstance<?> customerSupportInstance = startBySendingRequest();
-
+        startBySendingRequest();
         final ProcessInstance<?> resolveIssueInstance = resolveIssueProcess.instances().stream().findFirst().orElse(null);
-        performAnswerByCustomerSupport(resolveIssueInstance);
+        performAnswerBySupport(resolveIssueInstance);
+        performAnswerByCustomer(resolveIssueInstance, false);
+        performAnswerBySupport(resolveIssueInstance);
+        performAnswerByCustomer(resolveIssueInstance, true);
     }
 
     private ProcessInstance<?> startBySendingRequest() {
         Assertions.assertNotNull(customerSupportProcess);
 
+        // prepare parameters and process model
         final Map<String, Object> parameters = generateValidParameters();
         final Model model = customerSupportProcess.createModel();
         model.fromMap(parameters);
 
+        // start process using parameters
         final ProcessInstance<?> instance = customerSupportProcess.createInstance(model);
         instance.start();
 
@@ -133,28 +144,74 @@ public class CustomerSupportProcessTest {
         return instance;
     }
 
-    private void performAnswerByCustomerSupport(final ProcessInstance<?> resolveProcessInstance) {
+    private void performAnswerBySupport(final ProcessInstance<?> resolveProcessInstance) {
         Assertions.assertNotNull(resolveProcessInstance);
 
-        final WorkItem userTask = resolveProcessInstance.workItems().stream().findFirst().orElse(null);
-        Assertions.assertNotNull(userTask);
-        Assertions.assertEquals("WriteReplyToCustomer", userTask.getName());
+        // get current user task
+        final WorkItem currentUserTask = resolveProcessInstance.workItems().stream().findFirst().orElse(null);
+        Assertions.assertNotNull(currentUserTask);
+        Assertions.assertEquals("WriteReplyToCustomer", currentUserTask.getName(), "current user task should be reply to customer");
 
-        final String userTaskId = userTask.getId();
+        final String currentUserTaskId = currentUserTask.getId();
 
+        // prepare answer by support team
         final Map<String, Object> parameters = new HashMap<>();
         final SupportIssueMessage replyToCustomer = TestSupportIssueMessages.getRandomValid();
         parameters.put("message", replyToCustomer);
 
-        final long messageCountBeforeAnswer = fetchAllSupportIssues().size();
-        resolveProcessInstance.completeWorkItem(userTaskId, parameters);
-
+        // send reply by support team
         final SupportIssue currentIssue = fetchAllSupportIssues().stream().findFirst().orElse(null);
         Assertions.assertNotNull(currentIssue);
+        final long messageCountBeforeAnswer = currentIssue.getMessages().size();
+        resolveProcessInstance.completeWorkItem(currentUserTaskId, parameters);
+
         Assertions.assertEquals(SupportIssueStatus.IN_WORK, currentIssue.getStatus(), "issue has wrong status");
 
-        final Set<SupportIssueMessage> messages = currentIssue.getMessages();
+        final List<SupportIssueMessage> messages = currentIssue.getMessages();
         Assertions.assertEquals(messageCountBeforeAnswer + 1, messages.size(), "message has not been added");
+
+        final SupportIssueMessage latestMessage = extractLatestMessage(messages);
+        Assertions.assertEquals(replyToCustomer, latestMessage);
+        Assertions.assertEquals(false, latestMessage.isFromCustomer(), "message must be from support team, not customer");
     }
 
+    private void performAnswerByCustomer(final ProcessInstance<?> resolveProcessInstance, final boolean resolved) {
+        Assertions.assertNotNull(resolveProcessInstance);
+
+        // get current user task
+        final WorkItem currentUserTask = resolveProcessInstance.workItems().stream().findFirst().orElse(null);
+        Assertions.assertNotNull(currentUserTask);
+        Assertions.assertEquals("WriteReplyToSupport", currentUserTask.getName(), "current user task should be reply to support");
+        final String currentUserTaskId = currentUserTask.getId();
+
+        // prepare answer by customer
+        final Map<String, Object> parameters = new HashMap<>();
+        final SupportIssueMessage replyToCustomer = TestSupportIssueMessages.getRandomValid();
+        replyToCustomer.setHasResolvedIssue(resolved);
+        parameters.put("message", replyToCustomer);
+
+        // send answer
+        final SupportIssue currentIssue = fetchAllSupportIssues().stream().findFirst().orElse(null);
+        Assertions.assertNotNull(currentIssue);
+        final long messageCountBeforeAnswer = currentIssue.getMessages().size();
+        resolveProcessInstance.completeWorkItem(currentUserTaskId, parameters);
+
+        if (resolved) {
+            Assertions.assertEquals(SupportIssueStatus.CLOSED, currentIssue.getStatus(), "issue has wrong status");
+        } else {
+            Assertions.assertEquals(SupportIssueStatus.IN_WORK, currentIssue.getStatus(), "issue has wrong status");
+        }
+
+        final List<SupportIssueMessage> messages = currentIssue.getMessages();
+        Assertions.assertEquals(messageCountBeforeAnswer + 1, messages.size(), "message has not been added");
+
+        final SupportIssueMessage latestMessage = extractLatestMessage(messages);
+        Assertions.assertEquals(replyToCustomer, latestMessage);
+        Assertions.assertEquals(true, latestMessage.isFromCustomer(), "message must be from support team, not customer");
+    }
+
+    private SupportIssueMessage extractLatestMessage(final Collection<SupportIssueMessage> messages) {
+        return messages.stream().toList()
+                .stream().sorted().reduce((first, second) -> second).orElse(null);
+    }
 }

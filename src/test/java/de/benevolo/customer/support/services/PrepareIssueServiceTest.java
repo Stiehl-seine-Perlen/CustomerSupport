@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -81,11 +82,11 @@ public class PrepareIssueServiceTest {
         Assertions.assertEquals(someIssue.getIssuerEmailAddress(), persistedIssue.getIssuerEmailAddress(), "incorrect email persisted");
         Assertions.assertEquals(SupportIssueStatus.OPEN, persistedIssue.getStatus());
 
-        final Set<SupportIssueMessage> persistedMessages = persistedIssue.getMessages();
+        final List<SupportIssueMessage> persistedMessages = persistedIssue.getMessages();
         Assertions.assertNotNull(persistedMessages, "set of messages was null");
         Assertions.assertEquals(1, persistedMessages.size(), "there must be exactly 1 message after creation");
 
-        final SupportIssueMessage persistedFirstMessage = persistedMessages.stream().findFirst().get();
+        final SupportIssueMessage persistedFirstMessage = persistedMessages.stream().findFirst().orElse(null);
         Assertions.assertNotNull(persistedFirstMessage, "first message must not be null");
         Assertions.assertEquals(someMessage.getMessage(), persistedFirstMessage.getMessage(), "wrong message content persisted");
         Assertions.assertTrue(persistedFirstMessage.isFromCustomer(), "first message must be from customer");

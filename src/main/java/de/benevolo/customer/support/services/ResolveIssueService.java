@@ -65,10 +65,11 @@ public class ResolveIssueService {
         return message.getId();
     }
 
+    @Transactional
     public Boolean processCustomerReply(final Long issueId, final Long messageId) {
+        log.infof("processing message id:%d from customer of issue id:%d", messageId, issueId);
         final SupportIssueMessage message = messageRepository.findById(messageId);
-
-        return false;
+        return message.getHasResolvedIssue();
     }
 
 }
