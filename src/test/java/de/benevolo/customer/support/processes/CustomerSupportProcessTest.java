@@ -99,10 +99,15 @@ public class CustomerSupportProcessTest {
     public void happyPath() {
         startBySendingRequest();
         final ProcessInstance<?> resolveIssueInstance = resolveIssueProcess.instances().stream().findFirst().orElse(null);
-        performAnswerBySupport(resolveIssueInstance);
+        Assertions.assertNotNull(resolveIssueInstance);
+
+        // perform chat between customer and support team
+        performAnswerBySupportTeam(resolveIssueInstance);
         performAnswerByCustomer(resolveIssueInstance, false);
-        performAnswerBySupport(resolveIssueInstance);
+        performAnswerBySupportTeam(resolveIssueInstance);
         performAnswerByCustomer(resolveIssueInstance, true);
+
+        Assertions.assertEquals(ProcessInstance.STATE_COMPLETED, resolveIssueInstance.status());
     }
 
     private ProcessInstance<?> startBySendingRequest() {
@@ -117,6 +122,7 @@ public class CustomerSupportProcessTest {
         final ProcessInstance<?> instance = customerSupportProcess.createInstance(model);
         instance.start();
 
+        // assertions
         final SupportRequest sentRequest = (SupportRequest) parameters.get("request");
 
         final List<SupportIssue> issues = fetchAllSupportIssues();
@@ -144,7 +150,7 @@ public class CustomerSupportProcessTest {
         return instance;
     }
 
-    private void performAnswerBySupport(final ProcessInstance<?> resolveProcessInstance) {
+    private void performAnswerBySupportTeam(final ProcessInstance<?> resolveProcessInstance) {
         Assertions.assertNotNull(resolveProcessInstance);
 
         // get current user task
@@ -165,6 +171,7 @@ public class CustomerSupportProcessTest {
         final long messageCountBeforeAnswer = currentIssue.getMessages().size();
         resolveProcessInstance.completeWorkItem(currentUserTaskId, parameters);
 
+        // assertions
         Assertions.assertEquals(SupportIssueStatus.IN_WORK, currentIssue.getStatus(), "issue has wrong status");
 
         final List<SupportIssueMessage> messages = currentIssue.getMessages();
@@ -175,7 +182,7 @@ public class CustomerSupportProcessTest {
         Assertions.assertEquals(false, latestMessage.isFromCustomer(), "message must be from support team, not customer");
     }
 
-    private void performAnswerByCustomer(final ProcessInstance<?> resolveProcessInstance, final boolean resolved) {
+    private void performAnswerByCustomer(final ProcessInstance<?> resolveProcessInstance, final boolean messageResolvesIssue) {
         Assertions.assertNotNull(resolveProcessInstance);
 
         // get current user task
@@ -187,7 +194,7 @@ public class CustomerSupportProcessTest {
         // prepare answer by customer
         final Map<String, Object> parameters = new HashMap<>();
         final SupportIssueMessage replyToCustomer = TestSupportIssueMessages.getRandomValid();
-        replyToCustomer.setHasResolvedIssue(resolved);
+        replyToCustomer.setHasResolvedIssue(messageResolvesIssue);
         parameters.put("message", replyToCustomer);
 
         // send answer
@@ -196,7 +203,8 @@ public class CustomerSupportProcessTest {
         final long messageCountBeforeAnswer = currentIssue.getMessages().size();
         resolveProcessInstance.completeWorkItem(currentUserTaskId, parameters);
 
-        if (resolved) {
+        // assertions
+        if (messageResolvesIssue) {
             Assertions.assertEquals(SupportIssueStatus.CLOSED, currentIssue.getStatus(), "issue has wrong status");
         } else {
             Assertions.assertEquals(SupportIssueStatus.IN_WORK, currentIssue.getStatus(), "issue has wrong status");

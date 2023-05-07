@@ -35,6 +35,10 @@ public class SupportIssue {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<SupportIssueMessage> messages = new LinkedList<>();
 
+    @OneToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private CustomerFeedback feedback;
+
     protected SupportIssue() {
     }
 
@@ -96,6 +100,17 @@ public class SupportIssue {
     public void addMessage(final SupportIssueMessage message) {
         messages.add(message);
         message.setIssue(this);
+    }
+
+    public CustomerFeedback getFeedback() {
+        return feedback;
+    }
+
+    public void setFeedback(final CustomerFeedback feedback) {
+        this.feedback = feedback;
+        if (feedback.getIssue() != this) {
+            feedback.setIssue(this);
+        }
     }
 
     @Override

@@ -25,14 +25,12 @@ public class TestSupportIssueMessages {
 
     public static SupportIssueMessage getRandomValid() {
         final String message = validMessages[new Random().nextInt(validMessages.length)];
-        final boolean isFromCustomer = new Random().nextBoolean();
-        return new SupportIssueMessage(message, isFromCustomer, new HashSet<>(), false);
+        return new SupportIssueMessage(message, new HashSet<>(), false);
     }
 
     public static SupportIssueMessage getRandomInvalid() {
         final String message = invalidMessages[new Random().nextInt(invalidMessages.length)];
-        final boolean isFromCustomer = new Random().nextBoolean();
-        return new SupportIssueMessage(message, isFromCustomer, new HashSet<>(), false);
+        return new SupportIssueMessage(message, new HashSet<>(), false);
     }
 
     public static List<SupportIssueMessage> getAllValidCombinations() {
@@ -40,7 +38,7 @@ public class TestSupportIssueMessages {
 
         for (final String validMessageContent : validMessages) {
             final SupportIssueMessage validMessage
-                    = new SupportIssueMessage(validMessageContent, new Random().nextBoolean(), new HashSet<>(), false);
+                    = new SupportIssueMessage(validMessageContent, new HashSet<>(), false);
             messages.add(validMessage);
         }
 
@@ -52,7 +50,7 @@ public class TestSupportIssueMessages {
 
         for (final String invalidMessageContent : invalidMessages) {
             final SupportIssueMessage invalidMessage
-                    = new SupportIssueMessage(invalidMessageContent, new Random().nextBoolean(), new HashSet<>(), false);
+                    = new SupportIssueMessage(invalidMessageContent, new HashSet<>(), false);
             messages.add(invalidMessage);
         }
 

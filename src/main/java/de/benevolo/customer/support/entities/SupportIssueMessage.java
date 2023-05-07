@@ -34,8 +34,8 @@ public class SupportIssueMessage implements Comparable<SupportIssueMessage> {
     /**
      * Defines who sent the message (either the customer or the support team)
      */
-    @NotNull(message = "isFromCustomer is missing")
-    private Boolean isFromCustomer;
+    @NotNull(message = "fromCustomer is missing")
+    private Boolean fromCustomer;
 
     /**
      * Marks the message as the one, which resolved the issue. If this is true, the issue may have been closed.
@@ -75,14 +75,13 @@ public class SupportIssueMessage implements Comparable<SupportIssueMessage> {
 
     @JsonCreator
     public SupportIssueMessage(@JsonProperty(required = true) final String message,
-                               @JsonProperty(required = true) final boolean isFromCustomer,
                                @JsonProperty(required = true) final Set<Attachment> attachments,
                                @JsonProperty(defaultValue = "false") final Boolean hasResolvedIssue) {
         this.message = message;
-        this.isFromCustomer = isFromCustomer;
         attachments.forEach(this::addAttachment);
         this.attachments = attachments;
         this.hasResolvedIssue = hasResolvedIssue;
+        this.fromCustomer = false;
     }
 
     protected SupportIssueMessage() {
@@ -97,11 +96,11 @@ public class SupportIssueMessage implements Comparable<SupportIssueMessage> {
     }
 
     public Boolean isFromCustomer() {
-        return isFromCustomer;
+        return fromCustomer;
     }
 
     public void setFromCustomer(final Boolean fromCustomer) {
-        isFromCustomer = fromCustomer;
+        this.fromCustomer = fromCustomer;
     }
 
     public Set<Attachment> getAttachments() {
@@ -154,12 +153,12 @@ public class SupportIssueMessage implements Comparable<SupportIssueMessage> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final SupportIssueMessage message1 = (SupportIssueMessage) o;
-        return Objects.equals(id, message1.id) && Objects.equals(message, message1.message) && Objects.equals(isFromCustomer, message1.isFromCustomer) && Objects.equals(hasResolvedIssue, message1.hasResolvedIssue) && Objects.equals(creation, message1.creation);
+        return Objects.equals(id, message1.id) && Objects.equals(message, message1.message) && Objects.equals(fromCustomer, message1.fromCustomer) && Objects.equals(hasResolvedIssue, message1.hasResolvedIssue) && Objects.equals(creation, message1.creation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, message, isFromCustomer, hasResolvedIssue, creation);
+        return Objects.hash(id, message, fromCustomer, hasResolvedIssue, creation);
     }
 
     @Override
@@ -167,7 +166,7 @@ public class SupportIssueMessage implements Comparable<SupportIssueMessage> {
         return "SupportIssueMessage{" +
                 "id=" + id +
                 ", message='" + message + '\'' +
-                ", isFromCustomer=" + isFromCustomer +
+                ", isFromCustomer=" + fromCustomer +
                 ", hasResolvedIssue=" + hasResolvedIssue +
                 ", creation=" + creation +
                 '}';
