@@ -2,6 +2,7 @@ package de.benevolo.customer.support.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
@@ -31,8 +32,9 @@ public class CustomerFeedback {
 
     private String message;
 
-    @OneToOne(mappedBy = "feedback")
-    @JoinColumn(nullable = false)
+    @JsonIgnore
+    @OneToOne
+    @JoinColumn
     private SupportIssue issue;
 
     private LocalDateTime creation;
@@ -82,7 +84,7 @@ public class CustomerFeedback {
 
     public void setIssue(final SupportIssue issue) {
         this.issue = issue;
-        if (issue.getFeedback() != this) {
+        if (issue != null && issue.getFeedback() != this) {
             issue.setFeedback(this);
         }
     }

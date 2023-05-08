@@ -2,6 +2,7 @@ package de.benevolo.customer.support.services;
 
 
 import de.benevolo.customer.support.database.AttachmentRepository;
+import de.benevolo.customer.support.database.CustomerFeedbackRepository;
 import de.benevolo.customer.support.database.SupportIssueMessageRepository;
 import de.benevolo.customer.support.database.SupportIssueRepository;
 import de.benevolo.customer.support.entities.*;
@@ -10,10 +11,7 @@ import de.benevolo.customer.support.entities.testdata.TestSupportIssueMessages;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
 import org.jboss.logging.Logger;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -41,11 +39,24 @@ public class PrepareIssueServiceTest {
     @Inject
     AttachmentRepository attachmentRepository;
 
+    @Inject
+    CustomerFeedbackRepository feedbackRepository;
+
     @BeforeEach
     @Transactional
     public void prepare() {
         attachmentRepository.deleteAll();
         messageRepository.deleteAll();
+        feedbackRepository.deleteAll();
+        issueRepository.deleteAll();
+    }
+
+    @AfterEach
+    @Transactional
+    public void cleanUp() {
+        attachmentRepository.deleteAll();
+        messageRepository.deleteAll();
+        feedbackRepository.deleteAll();
         issueRepository.deleteAll();
     }
 

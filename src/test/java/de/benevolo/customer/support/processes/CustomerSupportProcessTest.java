@@ -1,10 +1,12 @@
 package de.benevolo.customer.support.processes;
 
 import de.benevolo.customer.support.database.AttachmentRepository;
+import de.benevolo.customer.support.database.CustomerFeedbackRepository;
 import de.benevolo.customer.support.database.SupportIssueMessageRepository;
 import de.benevolo.customer.support.database.SupportIssueRepository;
 import de.benevolo.customer.support.entities.*;
 import de.benevolo.customer.support.entities.testdata.TestAttachments;
+import de.benevolo.customer.support.entities.testdata.TestCustomerFeedback;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssueMessages;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
@@ -31,6 +33,10 @@ public class CustomerSupportProcessTest {
     Process<? extends Model> resolveIssueProcess;
 
     @Inject
+    @Named("FinalizeSupportIssue")
+    Process<? extends Model> finalizeIssueProcess;
+
+    @Inject
     SupportIssueRepository issueRepository;
 
     @Inject
@@ -38,6 +44,9 @@ public class CustomerSupportProcessTest {
 
     @Inject
     AttachmentRepository attachmentRepository;
+
+    @Inject
+    CustomerFeedbackRepository feedbackRepository;
 
     private Set<UUID> currentAttachmentIds = new HashSet<>();
 
@@ -62,8 +71,9 @@ public class CustomerSupportProcessTest {
     @AfterEach
     @Transactional
     public void cleanUp() {
-        attachmentRepository.deleteAll();
+        feedbackRepository.deleteAll();
         issueRepository.deleteAll();
+        attachmentRepository.deleteAll();
         messageRepository.deleteAll();
     }
 
@@ -97,7 +107,7 @@ public class CustomerSupportProcessTest {
     @DisplayName("the happy path should work")
     @Transactional
     public void happyPath() {
-        startBySendingRequest();
+        final ProcessInstance<?> customerSupportInstance = startBySendingRequest();
         final ProcessInstance<?> resolveIssueInstance = resolveIssueProcess.instances().stream().findFirst().orElse(null);
         Assertions.assertNotNull(resolveIssueInstance);
 
@@ -108,6 +118,13 @@ public class CustomerSupportProcessTest {
         performAnswerByCustomer(resolveIssueInstance, true);
 
         Assertions.assertEquals(ProcessInstance.STATE_COMPLETED, resolveIssueInstance.status());
+
+        // finalize issue
+        final ProcessInstance<?> finalizeIssueInstance = finalizeIssueProcess.instances().stream().findFirst().orElse(null);
+        performCustomerFeedback(finalizeIssueInstance);
+
+        Assertions.assertEquals(ProcessInstance.STATE_COMPLETED, finalizeIssueInstance.status());
+        Assertions.assertEquals(ProcessInstance.STATE_COMPLETED, customerSupportInstance.status());
     }
 
     private ProcessInstance<?> startBySendingRequest() {
@@ -153,12 +170,7 @@ public class CustomerSupportProcessTest {
     private void performAnswerBySupportTeam(final ProcessInstance<?> resolveProcessInstance) {
         Assertions.assertNotNull(resolveProcessInstance);
 
-        // get current user task
-        final WorkItem currentUserTask = resolveProcessInstance.workItems().stream().findFirst().orElse(null);
-        Assertions.assertNotNull(currentUserTask);
-        Assertions.assertEquals("WriteReplyToCustomer", currentUserTask.getName(), "current user task should be reply to customer");
-
-        final String currentUserTaskId = currentUserTask.getId();
+        final String currentUserTaskId = findCurrentUserTask(resolveProcessInstance, "WriteReplyToCustomer");
 
         // prepare answer by support team
         final Map<String, Object> parameters = new HashMap<>();
@@ -186,10 +198,7 @@ public class CustomerSupportProcessTest {
         Assertions.assertNotNull(resolveProcessInstance);
 
         // get current user task
-        final WorkItem currentUserTask = resolveProcessInstance.workItems().stream().findFirst().orElse(null);
-        Assertions.assertNotNull(currentUserTask);
-        Assertions.assertEquals("WriteReplyToSupport", currentUserTask.getName(), "current user task should be reply to support");
-        final String currentUserTaskId = currentUserTask.getId();
+        final String currentUserTaskId = findCurrentUserTask(resolveProcessInstance, "WriteReplyToSupport");
 
         // prepare answer by customer
         final Map<String, Object> parameters = new HashMap<>();
@@ -216,6 +225,28 @@ public class CustomerSupportProcessTest {
         final SupportIssueMessage latestMessage = extractLatestMessage(messages);
         Assertions.assertEquals(replyToCustomer, latestMessage);
         Assertions.assertEquals(true, latestMessage.isFromCustomer(), "message must be from support team, not customer");
+    }
+
+    private void performCustomerFeedback(final ProcessInstance<?> finalizeIssueInstance) {
+        Assertions.assertNotNull(finalizeIssueInstance);
+
+        // get current user task
+        final String currentUserTaskId = findCurrentUserTask(finalizeIssueInstance, "Feedback");
+
+        // prepare parameters
+        final Map<String, Object> parameters = new HashMap<>();
+        final CustomerFeedback customerFeedback = TestCustomerFeedback.getRandomValid();
+        parameters.put("feedback", customerFeedback);
+
+        // send feedback
+        finalizeIssueInstance.completeWorkItem(currentUserTaskId, parameters);
+    }
+
+    private String findCurrentUserTask(final ProcessInstance<?> instance, final String name) {
+        final WorkItem currentUserTask = instance.workItems().stream().findFirst().orElse(null);
+        Assertions.assertNotNull(currentUserTask);
+        Assertions.assertEquals(name, currentUserTask.getName(), "current user task should be " + name);
+        return currentUserTask.getId();
     }
 
     private SupportIssueMessage extractLatestMessage(final Collection<SupportIssueMessage> messages) {

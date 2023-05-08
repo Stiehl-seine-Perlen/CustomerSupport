@@ -8,6 +8,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.*;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -22,6 +23,9 @@ public class CustomerFeedbackTest {
 
     @Inject
     SupportIssueRepository supportIssueRepository;
+
+    @Inject
+    EntityManager entityManager;
 
     @Inject
     Validator validator;
@@ -43,8 +47,8 @@ public class CustomerFeedbackTest {
     @AfterEach
     @Transactional
     public void cleanUp() {
-        supportIssueRepository.deleteAll();
         feedbackRepository.deleteAll();
+        supportIssueRepository.deleteAll();
     }
 
     @Test
@@ -68,7 +72,7 @@ public class CustomerFeedbackTest {
         issue.setFeedback(originalFeedback);
 
         feedbackRepository.persist(originalFeedback);
-        feedbackRepository.flush();
+        entityManager.flush();
 
         final CustomerFeedback persistedCustomerFeedback = feedbackRepository.findById(originalFeedback.getId());
         Assertions.assertNotNull(persistedCustomerFeedback);
@@ -76,12 +80,24 @@ public class CustomerFeedbackTest {
     }
 
     @Test
-    @DisplayName("persisting without issue should fail")
+    @DisplayName("deleting the issue should delete the feedback as well")
     @Transactional
-    public void createWithoutIssue() {
-        final CustomerFeedback customerFeedback = TestCustomerFeedback.getRandomValid();
+    public void cascadeDelete() {
+        // create using issue
+        final CustomerFeedback originalFeedback = TestCustomerFeedback.getRandomValid();
 
-        Assertions.assertThrows(Exception.class, () -> feedbackRepository.persist(customerFeedback));
+        final SupportIssue issue = supportIssueRepository.findById(currentIssueId);
+        issue.setFeedback(originalFeedback);
+
+        feedbackRepository.persist(originalFeedback);
+        entityManager.flush();
+
+        // delete issue
+        supportIssueRepository.deleteById(currentIssueId);
+        entityManager.flush();
+
+        // check if feedback has been deleted as well
+        Assertions.assertNull(feedbackRepository.findById(originalFeedback.getId()));
     }
 
 

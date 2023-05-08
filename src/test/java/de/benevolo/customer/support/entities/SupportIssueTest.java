@@ -4,10 +4,7 @@ import de.benevolo.customer.support.database.SupportIssueRepository;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssueMessages;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -32,6 +29,12 @@ public class SupportIssueTest {
     @BeforeEach
     @Transactional
     public void prepare() {
+        issueRepository.deleteAll();
+    }
+
+    @AfterEach
+    @Transactional
+    public void cleanUp() {
         issueRepository.deleteAll();
     }
 

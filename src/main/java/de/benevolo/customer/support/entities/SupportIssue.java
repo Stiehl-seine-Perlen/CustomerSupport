@@ -31,12 +31,11 @@ public class SupportIssue {
     @Enumerated(EnumType.STRING)
     private SupportIssueStatus status;
 
-    @OneToMany(mappedBy = "issue", orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "issue", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<SupportIssueMessage> messages = new LinkedList<>();
 
-    @OneToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OneToOne(mappedBy = "issue", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private CustomerFeedback feedback;
 
     protected SupportIssue() {

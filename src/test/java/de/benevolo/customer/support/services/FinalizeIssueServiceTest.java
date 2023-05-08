@@ -1,14 +1,14 @@
 package de.benevolo.customer.support.services;
 
+import de.benevolo.customer.support.database.CustomerFeedbackRepository;
 import de.benevolo.customer.support.database.SupportIssueRepository;
+import de.benevolo.customer.support.entities.CustomerFeedback;
 import de.benevolo.customer.support.entities.SupportIssue;
 import de.benevolo.customer.support.entities.SupportIssueStatus;
+import de.benevolo.customer.support.entities.testdata.TestCustomerFeedback;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -20,6 +20,8 @@ public class FinalizeIssueServiceTest {
     @Inject
     SupportIssueRepository issueRepository;
 
+    @Inject
+    CustomerFeedbackRepository feedbackRepository;
 
     @Inject
     EntityManager entityManager;
@@ -30,6 +32,14 @@ public class FinalizeIssueServiceTest {
     @BeforeEach
     @Transactional
     public void prepare() {
+        feedbackRepository.deleteAll();
+        issueRepository.deleteAll();
+    }
+
+    @AfterEach
+    @Transactional
+    public void cleanUp() {
+        feedbackRepository.deleteAll();
         issueRepository.deleteAll();
     }
 
@@ -47,6 +57,24 @@ public class FinalizeIssueServiceTest {
 
         final SupportIssue persistedIssue = issueRepository.findById(issue.getId());
         Assertions.assertEquals(SupportIssueStatus.CLOSED, persistedIssue.getStatus());
+    }
+
+    @Test
+    @DisplayName("should process customer feedback")
+    @Transactional
+    public void processCustomerFeedback() {
+        SupportIssue issue = TestSupportIssues.getRandomValid();
+        issueRepository.persist(issue);
+
+        entityManager.flush();
+
+        final CustomerFeedback feedback = TestCustomerFeedback.getRandomValid();
+        service.processCustomerFeedback(issue.getId(), feedback);
+
+        issue = issueRepository.findById(issue.getId());
+        final CustomerFeedback persistedFeedback = issue.getFeedback();
+        Assertions.assertNotNull(persistedFeedback);
+        Assertions.assertEquals(feedback, persistedFeedback);
     }
 
 }

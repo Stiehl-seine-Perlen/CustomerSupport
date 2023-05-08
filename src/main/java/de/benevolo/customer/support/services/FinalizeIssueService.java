@@ -1,7 +1,9 @@
 package de.benevolo.customer.support.services;
 
 
+import de.benevolo.customer.support.database.CustomerFeedbackRepository;
 import de.benevolo.customer.support.database.SupportIssueRepository;
+import de.benevolo.customer.support.entities.CustomerFeedback;
 import de.benevolo.customer.support.entities.SupportIssue;
 import de.benevolo.customer.support.entities.SupportIssueStatus;
 import org.jboss.logging.Logger;
@@ -17,9 +19,19 @@ public class FinalizeIssueService {
     SupportIssueRepository issueRepository;
 
     @Inject
+    CustomerFeedbackRepository feedbackRepository;
+
+    @Inject
     Logger log;
 
-    public void processCustomerFeedback() {
+    @Transactional
+    public Long processCustomerFeedback(final Long issueId, final CustomerFeedback feedback) {
+        final SupportIssue issue = issueRepository.findById(issueId);
+        feedback.setIssue(issue);
+
+        feedbackRepository.persist(feedback);
+
+        return feedback.getId();
     }
 
     /**
