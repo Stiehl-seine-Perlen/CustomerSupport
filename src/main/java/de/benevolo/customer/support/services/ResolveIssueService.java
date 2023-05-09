@@ -6,7 +6,8 @@ import de.benevolo.customer.support.database.SupportIssueRepository;
 import de.benevolo.customer.support.entities.SupportIssue;
 import de.benevolo.customer.support.entities.SupportIssueMessage;
 import de.benevolo.customer.support.entities.SupportIssueStatus;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -21,8 +22,7 @@ public class ResolveIssueService {
     @Inject
     SupportIssueMessageRepository messageRepository;
 
-    @Inject
-    Logger log;
+    private static final Logger LOG = LoggerFactory.getLogger(ResolveIssueService.class);
 
 
     /**
@@ -36,7 +36,7 @@ public class ResolveIssueService {
         final SupportIssue issue = issueRepository.findById(issueId);
         issue.setStatus(SupportIssueStatus.IN_WORK);
 
-        log.infof("marked issue id:%d as 'in-work'", issueId);
+        LOG.info("marked issue id:{} as 'in-work'", issueId);
     }
 
     @Transactional
@@ -47,7 +47,7 @@ public class ResolveIssueService {
         message.setFromCustomer(false);
         messageRepository.persist(message);
 
-        log.infof("added message by support team id:%d to support issue id:%d", message.getId(), issueId);
+        LOG.info("added message by support team id:{} to support issue id:{}", message.getId(), issueId);
 
         return message.getId();
     }
@@ -60,14 +60,14 @@ public class ResolveIssueService {
         message.setFromCustomer(true);
         messageRepository.persist(message);
 
-        log.infof("added message id:%d by customer to support issue id:%d", message.getId(), issueId);
+        LOG.info("added message id:{} by customer to support issue id:{}", message.getId(), issueId);
 
         return message.getId();
     }
 
     @Transactional
     public Boolean processCustomerReply(final Long issueId, final Long messageId) {
-        log.infof("processing message id:%d from customer of issue id:%d", messageId, issueId);
+        LOG.info("processing message id:{} from customer of issue id:{}", messageId, issueId);
         final SupportIssueMessage message = messageRepository.findById(messageId);
         return message.getHasResolvedIssue();
     }

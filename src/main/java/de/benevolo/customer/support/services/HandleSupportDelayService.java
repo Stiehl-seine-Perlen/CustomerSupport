@@ -1,23 +1,22 @@
 package de.benevolo.customer.support.services;
 
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 @ApplicationScoped
 public class HandleSupportDelayService {
 
-    @Inject
-    Logger log;
+    private static final Logger LOG = LoggerFactory.getLogger(HandleSupportDelayService.class);
 
     public String generateCustomerApology(final Long issueId) {
-        log.infof("generated apology for customer due to support delay for issue id:%d", issueId);
+        LOG.info("generated apology for customer due to support delay for issue id:{}", issueId);
         return String.format("sowweee, resolving your issue %d: we are lazy and slooow", issueId);
     }
 
     public String generateSupportTeamNotification(final Long issueId) {
-        log.infof("generated support team notification due to support delay for issue id:%d", issueId);
+        LOG.info("generated support team notification due to support delay for issue id:{}", issueId);
         return String.format("Get your shit together! Issue %d is still unresolved!", issueId);
     }
 

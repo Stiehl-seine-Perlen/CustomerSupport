@@ -8,7 +8,8 @@ import de.benevolo.customer.support.entities.Attachment;
 import de.benevolo.customer.support.entities.SupportIssue;
 import de.benevolo.customer.support.entities.SupportIssueMessage;
 import de.benevolo.customer.support.entities.SupportRequest;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -22,8 +23,7 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class PrepareIssueService {
 
-    @Inject
-    Logger log;
+    private static final Logger LOG = LoggerFactory.getLogger(PrepareIssueService.class);
 
     @Inject
     SupportIssueRepository supportIssueRepository;
@@ -49,7 +49,7 @@ public class PrepareIssueService {
     public Long createSupportIssue(final SupportRequest request) {
         // create request from issue (without message or attachments)
         final SupportIssue issue = new SupportIssue(request);
-        log.debugf("created new support issue with title '%s'", issue.getTitle());
+        LOG.debug("created new support issue with title '{}'", issue.getTitle());
 
         // convert attachment ids to attachments
         final Set<Attachment> firstMessageAttachments = fetchAttachmentsByIds(request.getAttachmentsIds());
@@ -57,7 +57,7 @@ public class PrepareIssueService {
         // create the first message of the issue using attachments and the request message
         final SupportIssueMessage firstMessage = new SupportIssueMessage(request.getMessage(), firstMessageAttachments, false);
         firstMessage.setFromCustomer(true);
-        log.debugf("created first support issue message with %d attachments", firstMessageAttachments.size());
+        LOG.debug("created first support issue message with {} attachments", firstMessageAttachments.size());
 
         // attach first message to new issue
         issue.addMessage(firstMessage);
@@ -66,14 +66,14 @@ public class PrepareIssueService {
         supportIssueRepository.persist(issue);
         messageRepository.persist(firstMessage);
 
-        log.infof("created new support issue id:%d from request", issue.getId());
+        LOG.info("created new support issue id:{} from request", issue.getId());
 
         return issue.getId();
     }
 
     @Transactional
     Set<Attachment> fetchAttachmentsByIds(final Set<UUID> attachmentsIds) {
-        log.debugf("fetching %d attachments by their ids", attachmentsIds.size());
+        LOG.debug("fetching {} attachments by their ids", attachmentsIds.size());
 
         final Set<Attachment> attachments = attachmentsIds.stream()
                 .map(id -> attachmentRepository.findById(id))
@@ -81,7 +81,7 @@ public class PrepareIssueService {
                 .collect(Collectors.toSet());
 
         if (attachments.size() != attachmentsIds.size()) {
-            log.warnf("some attachments were not uploaded correctly: found %d ids in request, but only %d matching attachments",
+            LOG.warn("some attachments were not uploaded correctly: found {} ids in request, but only {} matching attachments",
                     attachmentsIds.size(), attachments.size());
         }
 

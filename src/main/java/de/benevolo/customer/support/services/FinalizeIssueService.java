@@ -6,7 +6,8 @@ import de.benevolo.customer.support.database.SupportIssueRepository;
 import de.benevolo.customer.support.entities.CustomerFeedback;
 import de.benevolo.customer.support.entities.SupportIssue;
 import de.benevolo.customer.support.entities.SupportIssueStatus;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -21,8 +22,8 @@ public class FinalizeIssueService {
     @Inject
     CustomerFeedbackRepository feedbackRepository;
 
-    @Inject
-    Logger log;
+    // TODO: no
+    private static final Logger LOG = LoggerFactory.getLogger(FinalizeIssueService.class);
 
     @Transactional
     public Long processCustomerFeedback(final Long issueId, final CustomerFeedback feedback) {
@@ -44,11 +45,11 @@ public class FinalizeIssueService {
     public void closeSupportIssue(final Long issueId) {
         final SupportIssue issue = issueRepository.findById(issueId);
         issue.setStatus(SupportIssueStatus.CLOSED);
-        log.infof("closed support issue id:%d", issueId);
+        LOG.info("closed support issue id: {}", issueId);
     }
 
     public String generateCustomerConfirmation(final Long issueId) {
-        log.info("generated issue closing confirmation for customer");
+        LOG.info("generated issue closing confirmation for customer");
         return String.format("the issue with id:%d was closed. Thanks you for using Benevolo!", issueId);
     }
 
