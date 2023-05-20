@@ -25,6 +25,11 @@ public class TestAttachments {
         return new Attachment(UUID.randomUUID(), filename);
     }
 
+    public static Attachment getRandomInvalid() {
+        final String filename = invalidFilenames[new Random().nextInt(invalidFilenames.length)];
+        return new Attachment(UUID.randomUUID(), filename);
+    }
+
     public static List<Attachment> getAllValidCombinations() {
         final List<Attachment> attachments = new LinkedList<>();
 

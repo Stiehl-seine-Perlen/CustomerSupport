@@ -1,11 +1,15 @@
 package de.benevolo.customer.support.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -18,7 +22,7 @@ import java.util.Set;
  * @author Daniel Mehlber
  */
 @Entity
-public class SupportIssueMessage {
+public class SupportIssueMessage implements Comparable<SupportIssueMessage> {
 
     @Id
     @GeneratedValue
@@ -27,28 +31,60 @@ public class SupportIssueMessage {
     @NotBlank(message = "message must not be blank")
     private String message;
 
-    @NotNull(message = "isFromCustomer must not be null")
-    private Boolean isFromCustomer;
+    /**
+     * Defines who sent the message (either the customer or the support team)
+     */
+    @NotNull(message = "fromCustomer is missing")
+    private Boolean fromCustomer;
 
+    /**
+     * Marks the message as the one, which resolved the issue. If this is true, the issue may have been closed.
+     * Usually this message has been sent by the customer, but can also come from the support process in case the
+     * customer wasn't replying or the issue cannot be solved.
+     */
+    @NotNull(message = "hasResolvedIssue is missing")
+    private Boolean hasResolvedIssue;
+
+    /**
+     * All attachments of this message. This contains images, files and other additional content that could
+     * help the support team resolving the issue.
+     */
     @OneToMany(mappedBy = "message", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Attachment> attachments = new HashSet<>();
 
-    // @NotNull(message = "issue is null, but message needs an issue")
+    /**
+     * No message can exist without its parent issue. If the parent issue is deleted, all its messages will be deleted
+     * as well.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "issue_id", nullable = false)
+    @JoinColumn(nullable = false)
+    @JsonIgnore
     private SupportIssue issue;
+
+    /**
+     * The creation timestamp marks the time of creation (obviously). It is used to sort all messages of an issue
+     * in order to display them as chat.
+     */
+    private LocalDateTime creation;
+
+    @PrePersist
+    protected void persist() {
+        creation = LocalDateTime.now();
+    }
 
     @JsonCreator
     public SupportIssueMessage(@JsonProperty(required = true) final String message,
-                               @JsonProperty(required = true) final boolean isFromCustomer,
-                               @JsonProperty(required = true) final Set<Attachment> attachments) {
+                               @JsonProperty(required = true) final Set<Attachment> attachments,
+                               @JsonProperty(defaultValue = "false") final Boolean hasResolvedIssue) {
         this.message = message;
-        this.isFromCustomer = isFromCustomer;
+        attachments.forEach(this::addAttachment);
         this.attachments = attachments;
+        this.hasResolvedIssue = hasResolvedIssue;
+        this.fromCustomer = false;
     }
 
     protected SupportIssueMessage() {
-
     }
 
     public String getMessage() {
@@ -60,11 +96,11 @@ public class SupportIssueMessage {
     }
 
     public Boolean isFromCustomer() {
-        return isFromCustomer;
+        return fromCustomer;
     }
 
     public void setFromCustomer(final Boolean fromCustomer) {
-        isFromCustomer = fromCustomer;
+        this.fromCustomer = fromCustomer;
     }
 
     public Set<Attachment> getAttachments() {
@@ -91,6 +127,22 @@ public class SupportIssueMessage {
         this.issue = issue;
     }
 
+    public LocalDateTime getCreation() {
+        return creation;
+    }
+
+    public void setCreation(final LocalDateTime creation) {
+        this.creation = creation;
+    }
+
+    public Boolean getHasResolvedIssue() {
+        return hasResolvedIssue;
+    }
+
+    public void setHasResolvedIssue(final Boolean hasResolvedIssue) {
+        this.hasResolvedIssue = hasResolvedIssue;
+    }
+
     public void addAttachment(final Attachment attachment) {
         attachments.add(attachment);
         attachment.setMessage(this);
@@ -100,13 +152,13 @@ public class SupportIssueMessage {
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final SupportIssueMessage that = (SupportIssueMessage) o;
-        return Objects.equals(id, that.id) && Objects.equals(message, that.message) && Objects.equals(isFromCustomer, that.isFromCustomer) && Objects.equals(attachments, that.attachments) && Objects.equals(issue, that.issue);
+        final SupportIssueMessage message1 = (SupportIssueMessage) o;
+        return Objects.equals(id, message1.id) && Objects.equals(message, message1.message) && Objects.equals(fromCustomer, message1.fromCustomer) && Objects.equals(hasResolvedIssue, message1.hasResolvedIssue) && Objects.equals(creation, message1.creation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, message, isFromCustomer, attachments);
+        return Objects.hash(id, message, fromCustomer, hasResolvedIssue, creation);
     }
 
     @Override
@@ -114,9 +166,14 @@ public class SupportIssueMessage {
         return "SupportIssueMessage{" +
                 "id=" + id +
                 ", message='" + message + '\'' +
-                ", isFromCustomer=" + isFromCustomer +
-                ", attachments=" + attachments +
-                ", issueId=" + issue.getId() +
+                ", isFromCustomer=" + fromCustomer +
+                ", hasResolvedIssue=" + hasResolvedIssue +
+                ", creation=" + creation +
                 '}';
+    }
+
+    @Override
+    public int compareTo(final SupportIssueMessage supportIssueMessage) {
+        return creation.compareTo(supportIssueMessage.creation);
     }
 }

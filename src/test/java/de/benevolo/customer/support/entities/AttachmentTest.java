@@ -1,14 +1,13 @@
 package de.benevolo.customer.support.entities;
 
 import de.benevolo.customer.support.database.AttachmentRepository;
+import de.benevolo.customer.support.database.SupportIssueMessageRepository;
+import de.benevolo.customer.support.database.SupportIssueRepository;
 import de.benevolo.customer.support.entities.testdata.TestAttachments;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssueMessages;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -23,6 +22,12 @@ public class AttachmentTest {
 
     @Inject
     AttachmentRepository attachmentRepository;
+
+    @Inject
+    SupportIssueRepository issueRepository;
+
+    @Inject
+    SupportIssueMessageRepository messageRepository;
 
     @Inject
     EntityManager entityManager;
@@ -41,10 +46,18 @@ public class AttachmentTest {
         final SupportIssue issue = TestSupportIssues.getRandomValid();
         issue.addMessage(message);
 
-        entityManager.persist(issue);
-        entityManager.persist(message);
+        issueRepository.persist(issue);
+        messageRepository.persist(message);
 
         currentMessageId = message.getId();
+    }
+
+    @AfterEach
+    @Transactional
+    public void cleanUp() {
+        attachmentRepository.deleteAll();
+        issueRepository.deleteAll();
+        messageRepository.deleteAll();
     }
 
     @Test
@@ -88,14 +101,17 @@ public class AttachmentTest {
     }
 
     @Test
-    @DisplayName("attempt creation of attachments without message")
+    @DisplayName("test creation of attachments without message")
     @Transactional
     public void createWithoutMessage() {
         final Attachment originalAttachment = TestAttachments.getRandomValid();
 
         entityManager.persist(originalAttachment);
 
-        Assertions.assertThrows(Exception.class, () -> entityManager.flush());
+        entityManager.flush();
+
+        final Attachment persistedAttachment = attachmentRepository.findById(originalAttachment.getId());
+        Assertions.assertEquals(originalAttachment, persistedAttachment);
     }
 
 }

@@ -1,6 +1,7 @@
 package de.benevolo.customer.support.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
@@ -18,7 +19,8 @@ public class Attachment {
     private String filename;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "messageId", nullable = false)
+    @JoinColumn
+    @JsonIgnore
     private SupportIssueMessage message;
 
     @JsonCreator
@@ -60,7 +62,7 @@ public class Attachment {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final Attachment that = (Attachment) o;
-        return Objects.equals(id, that.id) && Objects.equals(filename, that.filename) && Objects.equals(message.getId(), that.message.getId());
+        return Objects.equals(id, that.id) && Objects.equals(filename, that.filename);
     }
 
     @Override

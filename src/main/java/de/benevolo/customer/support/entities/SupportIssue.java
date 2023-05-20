@@ -2,13 +2,16 @@ package de.benevolo.customer.support.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import java.util.HashSet;
+import javax.validation.constraints.NotNull;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 public class SupportIssue {
@@ -24,22 +27,33 @@ public class SupportIssue {
     @Email
     private String issuerEmailAddress;
 
-    @OneToMany(mappedBy = "issue", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<SupportIssueMessage> messages = new HashSet<>();
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private SupportIssueStatus status;
+
+    @OneToMany(mappedBy = "issue", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<SupportIssueMessage> messages = new LinkedList<>();
+
+    @OneToOne(mappedBy = "issue", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private CustomerFeedback feedback;
 
     protected SupportIssue() {
     }
 
     @JsonCreator
     public SupportIssue(@JsonProperty(required = true) final String title,
-                        @JsonProperty(required = true) final String issuerEmailAddress) {
+                        @JsonProperty(required = true) final String issuerEmailAddress,
+                        @JsonProperty(required = true) final SupportIssueStatus status) {
         this.title = title;
         this.issuerEmailAddress = issuerEmailAddress;
+        this.status = status;
     }
 
     public SupportIssue(final SupportRequest request) {
         this.title = request.getTitle();
         this.issuerEmailAddress = request.getIssuerEmailAddress();
+        this.status = SupportIssueStatus.OPEN;
     }
 
     public Long getId() {
@@ -66,12 +80,20 @@ public class SupportIssue {
         this.issuerEmailAddress = issuerEmailAddress;
     }
 
-    public Set<SupportIssueMessage> getMessages() {
+    public List<SupportIssueMessage> getMessages() {
         return messages;
     }
 
-    public void setMessages(final Set<SupportIssueMessage> messages) {
+    public void setMessages(final List<SupportIssueMessage> messages) {
         this.messages = messages;
+    }
+
+    public SupportIssueStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(final SupportIssueStatus status) {
+        this.status = status;
     }
 
     public void addMessage(final SupportIssueMessage message) {
@@ -79,17 +101,28 @@ public class SupportIssue {
         message.setIssue(this);
     }
 
+    public CustomerFeedback getFeedback() {
+        return feedback;
+    }
+
+    public void setFeedback(final CustomerFeedback feedback) {
+        this.feedback = feedback;
+        if (feedback.getIssue() != this) {
+            feedback.setIssue(this);
+        }
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final SupportIssue that = (SupportIssue) o;
-        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(issuerEmailAddress, that.issuerEmailAddress) && Objects.equals(messages, that.messages);
+        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(issuerEmailAddress, that.issuerEmailAddress) && status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, issuerEmailAddress);
+        return Objects.hash(id, title, issuerEmailAddress, status);
     }
 
     @Override
@@ -98,7 +131,7 @@ public class SupportIssue {
                 "id=" + id +
                 ", title='" + title + '\'' +
                 ", issuerEmailAddress='" + issuerEmailAddress + '\'' +
-                ", messages=" + messages +
+                ", status='" + status + '\'' +
                 '}';
     }
 }

@@ -6,10 +6,7 @@ import de.benevolo.customer.support.entities.testdata.TestAttachments;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssueMessages;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -45,6 +42,13 @@ public class SupportIssueMessageTest {
         final SupportIssue currentSupportIssue = TestSupportIssues.getRandomValid();
         issueRepository.persist(currentSupportIssue);
         currentSupportIssueId = currentSupportIssue.getId();
+    }
+
+    @AfterEach
+    @Transactional
+    public void cleanUp() {
+        messageRepository.deleteAll();
+        issueRepository.deleteAll();
     }
 
     @Test
