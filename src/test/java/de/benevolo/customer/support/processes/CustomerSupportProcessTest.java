@@ -12,6 +12,7 @@ import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.*;
 import org.kie.kogito.Model;
+import org.kie.kogito.internal.process.runtime.KogitoNode;
 import org.kie.kogito.process.Process;
 import org.kie.kogito.process.ProcessInstance;
 import org.kie.kogito.process.WorkItem;
@@ -170,6 +171,7 @@ public class CustomerSupportProcessTest {
     private void performAnswerBySupportTeam(final ProcessInstance<?> resolveProcessInstance) {
         Assertions.assertNotNull(resolveProcessInstance);
 
+        triggerWriteReplyToCustomerTask(resolveProcessInstance);
         final String currentUserTaskId = findCurrentUserTask(resolveProcessInstance, "WriteReplyToCustomer");
 
         // prepare answer by support team
@@ -197,8 +199,10 @@ public class CustomerSupportProcessTest {
     private void performAnswerByCustomer(final ProcessInstance<?> resolveProcessInstance, final boolean messageResolvesIssue) {
         Assertions.assertNotNull(resolveProcessInstance);
 
-        // get current user task
+        // trigger and get current user task
+        triggerWriteReplyToSupportTask(resolveProcessInstance);
         final String currentUserTaskId = findCurrentUserTask(resolveProcessInstance, "WriteReplyToSupport");
+
 
         // prepare answer by customer
         final Map<String, Object> parameters = new HashMap<>();
@@ -242,8 +246,27 @@ public class CustomerSupportProcessTest {
         finalizeIssueInstance.completeWorkItem(currentUserTaskId, parameters);
     }
 
+
+    private void triggerWriteReplyToSupportTask(final ProcessInstance<?> resolveIssueInstance) {
+        // I added additional metadata to the user task node (in the BPMN editor) in order to identify the node here
+        final KogitoNode taskNode = resolveIssueInstance.process().findNodes(node -> "WriteReplyToSupport".equals(node.getMetaData().get("taskName")))
+                .stream().findFirst().orElse(null);
+
+        Assertions.assertNotNull(taskNode);
+        resolveIssueInstance.triggerNode(taskNode.getNodeUniqueId());
+    }
+
+    private void triggerWriteReplyToCustomerTask(final ProcessInstance<?> resolveIssueInstance) {
+        // I added additional metadata to the user task node (in the BPMN editor) in order to identify the node here
+        final KogitoNode taskNode = resolveIssueInstance.process().findNodes(node -> "WriteReplyToCustomer".equals(node.getMetaData().get("taskName")))
+                .stream().findFirst().orElse(null);
+
+        Assertions.assertNotNull(taskNode);
+        resolveIssueInstance.triggerNode(taskNode.getNodeUniqueId());
+    }
+
     private String findCurrentUserTask(final ProcessInstance<?> instance, final String name) {
-        final WorkItem currentUserTask = instance.workItems().stream().findFirst().orElse(null);
+        final WorkItem currentUserTask = instance.workItems().stream().filter(item -> item.getName().equals(name)).findFirst().orElse(null);
         Assertions.assertNotNull(currentUserTask);
         Assertions.assertEquals(name, currentUserTask.getName(), "current user task should be " + name);
         return currentUserTask.getId();
