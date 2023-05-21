@@ -11,7 +11,6 @@ import de.benevolo.customer.support.entities.testdata.TestSupportIssueMessages;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
-import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,7 +50,7 @@ public class AttachmentResourceTest {
 
         given().contentType(ContentType.JSON).body(attachment)
                 .when().post("/support/attachment")
-                .then().statusCode(RestResponse.StatusCode.OK);
+                .then().statusCode(200);
 
         final Attachment fetchedAttachment = attachmentRepository.findById(attachment.getId());
 
@@ -67,7 +66,7 @@ public class AttachmentResourceTest {
 
         given().contentType(ContentType.JSON).body(attachment)
                 .when().post("/support/attachment")
-                .then().statusCode(RestResponse.StatusCode.BAD_REQUEST);
+                .then().statusCode(400);
 
         final Attachment fetchedAttachment = attachmentRepository.findById(attachment.getId());
 
@@ -84,11 +83,11 @@ public class AttachmentResourceTest {
 
         given().contentType(ContentType.JSON).body(attachment1)
                 .when().post("/support/attachment")
-                .then().statusCode(RestResponse.StatusCode.OK);
+                .then().statusCode(200);
 
         given().contentType(ContentType.JSON).body(attachment2)
                 .when().post("/support/attachment")
-                .then().statusCode(RestResponse.StatusCode.CONFLICT);
+                .then().statusCode(409);
 
         final Attachment persistedAttachment = attachmentRepository.findById(attachment1.getId());
         Assertions.assertNotNull(persistedAttachment);
@@ -103,7 +102,7 @@ public class AttachmentResourceTest {
 
         given().pathParam("id", attachment.getId())
                 .when().delete("/support/attachment/{id}")
-                .then().statusCode(RestResponse.StatusCode.OK);
+                .then().statusCode(200);
 
         Assertions.assertNull(fetchAttachment(attachment.getId()));
     }
@@ -140,7 +139,7 @@ public class AttachmentResourceTest {
 
         given().pathParam("id", attachment.getId())
                 .when().delete("/support/attachment/{id}")
-                .then().statusCode(RestResponse.StatusCode.CONFLICT);
+                .then().statusCode(409);
 
         final Attachment stillExistingAttachment = fetchAttachment(attachment.getId());
         Assertions.assertNotNull(stillExistingAttachment);
@@ -155,7 +154,7 @@ public class AttachmentResourceTest {
 
         final Attachment returnedAttachment = given().pathParam("id", attachment.getId())
                 .when().get("/support/attachment/{id}")
-                .then().statusCode(RestResponse.StatusCode.OK).and().extract().body().as(Attachment.class);
+                .then().statusCode(200).and().extract().body().as(Attachment.class);
 
         Assertions.assertNotNull(returnedAttachment);
         Assertions.assertEquals(attachment, returnedAttachment);
@@ -168,6 +167,6 @@ public class AttachmentResourceTest {
 
         given().pathParam("id", id)
                 .when().get("/support/attachment/{id}")
-                .then().statusCode(RestResponse.StatusCode.GONE);
+                .then().statusCode(410);
     }
 }
