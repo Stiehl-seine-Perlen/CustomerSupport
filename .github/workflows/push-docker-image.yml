@@ -26,6 +26,7 @@ jobs:
         with:
           java-version: 17.0
           distribution: oracle
+          cache: "maven"
 
       - name: "Build the maven package"
         run: mvn -X -s $GITHUB_WORKSPACE/.github/maven/settings.xml -B package --file pom.xml
