@@ -28,7 +28,7 @@ jobs:
           distribution: oracle
 
       - name: "Build the maven package"
-        run: mvn -X -B package --file pom.xml
+        run: mvn -X -s $GITHUB_WORKSPACE/.github/maven/settings.xml -B package --file pom.xml
 
       - name: "Build and test issue-whisperer image"
         run: |
