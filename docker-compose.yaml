@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+
+  issue-whisperer-dev:
+    user: 185:33
+    image: 'docker.benevolo.de/stiehl-seine-perlen/issue-whisperer:dev'
+    restart: unless-stopped
+    environment:
+      QUARKUS_DATASOURCE_DB_KIND: POSTGRESQL
+      QUARKUS_HTTP_PORT: 8082
+      QUARKUS_DATASOURCE_USERNAME: issue-whisperer
+      QUARKUS_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgres-dev:5432/support
+      QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: drop-and-create
+      QUARKUS_HTTP_CORS_ORIGINS: "https://dev.benevolo.de" ## allow frontend as origin
+      KAFKA_BOOTSTRAP_SERVERS: rp-kafka:9092
+      QUARKUS_INFINISPAN_CLIENT_USE_AUTH: false
+      QUARKUS_INFINISPAN_CLIENT_HOSTS: infinispan:11222
+    networks:
+      - issue-whisperer
+      - kafka
+
+  postgres-dev:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: support
+      POSTGRES_USER: issue-whisperer
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - /microservices/issue-whisperer/postgres/data/:/var/lib/postgresql/data/
+    networks:
+      - issue-whisperer
+
+networks:
+  kafka:
+    external: true
+  issue-whisperer:
+    external: true
