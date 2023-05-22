@@ -39,6 +39,7 @@ jobs:
       - name: "Push frontend image to self hosted docker image registry"
         run: |
           docker push docker.benevolo.de/stiehl-seine-perlen/issue-whisperer:dev
-        # run: |
-        #   # curl -X POST https://portainer.benevolo.de/api/webhooks/89e0517f-88ea-46de-99df-f744a20521cf
-      # - name: "Deploy new image"
+
+      - name: "Deploy new image via webhook call"
+        run: |
+          curl -X POST https://portainer.benevolo.de/api/webhooks/201fd0f4-f059-41c6-b497-cddfa64dbedf
