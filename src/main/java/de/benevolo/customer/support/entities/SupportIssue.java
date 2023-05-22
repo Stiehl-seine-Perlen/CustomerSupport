@@ -31,7 +31,7 @@ public class SupportIssue {
     @Enumerated(EnumType.STRING)
     private SupportIssueStatus status;
 
-    @OneToMany(mappedBy = "issue", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "issue", orphanRemoval = true, cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<SupportIssueMessage> messages = new LinkedList<>();
 
