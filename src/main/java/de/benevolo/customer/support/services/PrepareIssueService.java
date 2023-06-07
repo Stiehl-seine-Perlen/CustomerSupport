@@ -49,6 +49,7 @@ public class PrepareIssueService {
     public Long createSupportIssue(final SupportRequest request) {
         // create request from issue (without message or attachments)
         final SupportIssue issue = new SupportIssue(request);
+        issue.open();
         LOG.debug("created new support issue with title '{}'", issue.getTitle());
 
         // convert attachment ids to attachments

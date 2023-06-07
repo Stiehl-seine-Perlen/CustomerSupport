@@ -5,7 +5,6 @@ import de.benevolo.customer.support.database.CustomerFeedbackRepository;
 import de.benevolo.customer.support.database.SupportIssueRepository;
 import de.benevolo.customer.support.entities.CustomerFeedback;
 import de.benevolo.customer.support.entities.SupportIssue;
-import de.benevolo.customer.support.entities.SupportIssueStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +21,6 @@ public class FinalizeIssueService {
     @Inject
     CustomerFeedbackRepository feedbackRepository;
 
-    // TODO: no
     private static final Logger LOG = LoggerFactory.getLogger(FinalizeIssueService.class);
 
     @Transactional
@@ -44,7 +42,7 @@ public class FinalizeIssueService {
     @Transactional
     public void closeSupportIssue(final Long issueId) {
         final SupportIssue issue = issueRepository.findById(issueId);
-        issue.setStatus(SupportIssueStatus.CLOSED);
+        issue.complete();
         LOG.info("closed support issue id: {}", issueId);
     }
 

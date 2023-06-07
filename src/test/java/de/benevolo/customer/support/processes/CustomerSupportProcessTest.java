@@ -171,7 +171,7 @@ public class CustomerSupportProcessTest {
     private void performAnswerBySupportTeam(final ProcessInstance<?> resolveProcessInstance) {
         Assertions.assertNotNull(resolveProcessInstance);
 
-        triggerWriteReplyToCustomerTask(resolveProcessInstance);
+        // triggerWriteReplyToCustomerTask(resolveProcessInstance);
         final String currentUserTaskId = findCurrentUserTask(resolveProcessInstance, "WriteReplyToCustomer");
 
         // prepare answer by support team
@@ -200,7 +200,7 @@ public class CustomerSupportProcessTest {
         Assertions.assertNotNull(resolveProcessInstance);
 
         // trigger and get current user task
-        triggerWriteReplyToSupportTask(resolveProcessInstance);
+        // triggerWriteReplyToSupportTask(resolveProcessInstance);
         final String currentUserTaskId = findCurrentUserTask(resolveProcessInstance, "WriteReplyToSupport");
 
 
@@ -249,7 +249,7 @@ public class CustomerSupportProcessTest {
 
     private void triggerWriteReplyToSupportTask(final ProcessInstance<?> resolveIssueInstance) {
         // I added additional metadata to the user task node (in the BPMN editor) in order to identify the node here
-        final KogitoNode taskNode = resolveIssueInstance.process().findNodes(node -> "WriteReplyToSupport".equals(node.getMetaData().get("taskName")))
+        final KogitoNode taskNode = resolveIssueInstance.process().findNodes(node -> "WriteReplyToSupport".equals(node.getMetaData().get("debugTaskName")))
                 .stream().findFirst().orElse(null);
 
         Assertions.assertNotNull(taskNode);
@@ -258,7 +258,7 @@ public class CustomerSupportProcessTest {
 
     private void triggerWriteReplyToCustomerTask(final ProcessInstance<?> resolveIssueInstance) {
         // I added additional metadata to the user task node (in the BPMN editor) in order to identify the node here
-        final KogitoNode taskNode = resolveIssueInstance.process().findNodes(node -> "WriteReplyToCustomer".equals(node.getMetaData().get("taskName")))
+        final KogitoNode taskNode = resolveIssueInstance.process().findNodes(node -> "WriteReplyToCustomer".equals(node.getMetaData().get("debugTaskName")))
                 .stream().findFirst().orElse(null);
 
         Assertions.assertNotNull(taskNode);

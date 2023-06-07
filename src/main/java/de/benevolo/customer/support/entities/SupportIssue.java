@@ -9,6 +9,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -32,11 +33,20 @@ public class SupportIssue {
     private SupportIssueStatus status;
 
     @OneToMany(mappedBy = "issue", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OrderBy("creation asc")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<SupportIssueMessage> messages = new LinkedList<>();
 
     @OneToOne(mappedBy = "issue", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private CustomerFeedback feedback;
+
+    private LocalDateTime openSince;
+
+    private LocalDateTime inWorkSince;
+
+    private LocalDateTime closedSince;
+
+    private String resolveIssueProcessId;
 
     protected SupportIssue() {
     }
@@ -54,6 +64,53 @@ public class SupportIssue {
         this.title = request.getTitle();
         this.issuerEmailAddress = request.getIssuerEmailAddress();
         this.status = SupportIssueStatus.OPEN;
+    }
+
+    public void open() {
+        this.openSince = LocalDateTime.now();
+        this.status = SupportIssueStatus.OPEN;
+    }
+
+    public void inWork() {
+        this.inWorkSince = LocalDateTime.now();
+        this.status = SupportIssueStatus.IN_WORK;
+    }
+
+    public void complete() {
+        this.closedSince = LocalDateTime.now();
+        this.status = SupportIssueStatus.CLOSED;
+    }
+
+    public String getResolveIssueProcessId() {
+        return resolveIssueProcessId;
+    }
+
+    public void setResolveIssueProcessId(final String resolveIssueProcessId) {
+        this.resolveIssueProcessId = resolveIssueProcessId;
+    }
+
+    public LocalDateTime getOpenSince() {
+        return openSince;
+    }
+
+    public void setOpenSince(final LocalDateTime openSince) {
+        this.openSince = openSince;
+    }
+
+    public LocalDateTime getInWorkSince() {
+        return inWorkSince;
+    }
+
+    public void setInWorkSince(final LocalDateTime inWorkSince) {
+        this.inWorkSince = inWorkSince;
+    }
+
+    public LocalDateTime getClosedSince() {
+        return closedSince;
+    }
+
+    public void setClosedSince(final LocalDateTime closedSince) {
+        this.closedSince = closedSince;
     }
 
     public Long getId() {

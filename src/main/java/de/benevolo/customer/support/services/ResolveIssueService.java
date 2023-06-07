@@ -5,7 +5,7 @@ import de.benevolo.customer.support.database.SupportIssueMessageRepository;
 import de.benevolo.customer.support.database.SupportIssueRepository;
 import de.benevolo.customer.support.entities.SupportIssue;
 import de.benevolo.customer.support.entities.SupportIssueMessage;
-import de.benevolo.customer.support.entities.SupportIssueStatus;
+import org.kie.kogito.internal.process.runtime.KogitoProcessContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,7 @@ public class ResolveIssueService {
     @Transactional
     public void issueInWork(final Long issueId) {
         final SupportIssue issue = issueRepository.findById(issueId);
-        issue.setStatus(SupportIssueStatus.IN_WORK);
+        issue.inWork();
 
         LOG.info("marked issue id:{} as 'in-work'", issueId);
     }
@@ -70,6 +70,14 @@ public class ResolveIssueService {
         LOG.info("processing message id:{} from customer of issue id:{}", messageId, issueId);
         final SupportIssueMessage message = messageRepository.findById(messageId);
         return message.getHasResolvedIssue();
+    }
+
+    @Transactional
+    public void prepareIssue(final Long issueId, final KogitoProcessContext context) {
+        final String resolveIssueProcessId = context.getProcessInstance().getStringId();
+
+        final SupportIssue issue = issueRepository.findById(issueId);
+        issue.setResolveIssueProcessId(resolveIssueProcessId);
     }
 
 }
