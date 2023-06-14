@@ -20,22 +20,30 @@ public class TestAttachments {
             "   "
     };
 
+    public static final String[] validLocations = {
+            "some/path/in/bucket"
+    };
+
+
     public static Attachment getRandomValid() {
         final String filename = validFilenames[new Random().nextInt(validFilenames.length)];
-        return new Attachment(UUID.randomUUID(), filename);
+        final String location = validLocations[new Random().nextInt(validLocations.length)];
+        return new Attachment(UUID.randomUUID(), filename, location);
     }
 
     public static Attachment getRandomInvalid() {
         final String filename = invalidFilenames[new Random().nextInt(invalidFilenames.length)];
-        return new Attachment(UUID.randomUUID(), filename);
+        return new Attachment(UUID.randomUUID(), filename, null);
     }
 
     public static List<Attachment> getAllValidCombinations() {
         final List<Attachment> attachments = new LinkedList<>();
 
         for (final String validFilename : validFilenames) {
-            final Attachment attachment = new Attachment(UUID.randomUUID(), validFilename);
-            attachments.add(attachment);
+            for (final String validLocation : validLocations) {
+                final Attachment attachment = new Attachment(UUID.randomUUID(), validFilename, validLocation);
+                attachments.add(attachment);
+            }
         }
 
         return attachments;
@@ -45,8 +53,10 @@ public class TestAttachments {
         final List<Attachment> attachments = new LinkedList<>();
 
         for (final String invalidFilename : invalidFilenames) {
-            final Attachment attachment = new Attachment(UUID.randomUUID(), invalidFilename);
+
+            final Attachment attachment = new Attachment(UUID.randomUUID(), invalidFilename, null);
             attachments.add(attachment);
+
         }
 
         return attachments;

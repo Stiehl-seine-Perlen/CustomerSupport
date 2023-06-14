@@ -18,6 +18,11 @@ import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
@@ -42,20 +47,47 @@ public class AttachmentResourceTest {
         issueRepository.deleteAll();
     }
 
+    private Attachment uploadTestAttachment(final Attachment attachment, final int expectedStatusCode) {
+
+        final InputStream fileStream = getClass().getResourceAsStream("/test.txt");
+        final File file = new File(getClass().getResource("/test.txt").getFile());
+        final long fileSize = file.length();
+
+        given().contentType(ContentType.MULTIPART)
+                .multiPart("uuid", attachment.getId().toString())
+                .multiPart("file", attachment.getFilename(), fileStream)
+                .multiPart("fileSize", fileSize)
+                .when().post("/support/attachment")
+                .then().statusCode(expectedStatusCode);
+
+        return attachment;
+    }
+
     @Test
     @DisplayName("valid attachments should be uploaded")
     @Transactional
-    public void uploadValidAttachment() {
-        final Attachment attachment = TestAttachments.getRandomValid();
+    public void uploadValidAttachment() throws IOException {
+        final Attachment initialAttachment = TestAttachments.getRandomValid();
+        uploadTestAttachment(initialAttachment, 200);
 
-        given().contentType(ContentType.JSON).body(attachment)
-                .when().post("/support/attachment")
-                .then().statusCode(200);
+        final Attachment fetchedAttachment = attachmentRepository.findById(initialAttachment.getId());
 
-        final Attachment fetchedAttachment = attachmentRepository.findById(attachment.getId());
+        // attachment location must have been updated
+        Assertions.assertNotEquals(fetchedAttachment.getLocation(), initialAttachment.getLocation());
+        initialAttachment.setLocation(fetchedAttachment.getLocation());
 
         Assertions.assertNotNull(fetchedAttachment);
-        Assertions.assertEquals(attachment, fetchedAttachment);
+        Assertions.assertEquals(initialAttachment, fetchedAttachment);
+
+        // assert that file has been uploaded and can be downloaded
+        final byte[] fetchedFile = given().pathParam("id", initialAttachment.getId().toString())
+                .when().get("/support/attachment/{id}/download")
+                .then().statusCode(200).and().extract().asByteArray();
+
+        final String fetchedBytesAsString = new String(fetchedFile);
+        final String expectedBytesAsString = new String(Files.readAllBytes(Paths.get(getClass().getResource("/test.txt").getPath())));
+
+        Assertions.assertEquals(expectedBytesAsString, fetchedBytesAsString);
     }
 
     @Test
@@ -63,10 +95,7 @@ public class AttachmentResourceTest {
     @Transactional
     public void uploadInvalidAttachment() {
         final Attachment attachment = TestAttachments.getRandomInvalid();
-
-        given().contentType(ContentType.JSON).body(attachment)
-                .when().post("/support/attachment")
-                .then().statusCode(400);
+        uploadTestAttachment(attachment, 400);
 
         final Attachment fetchedAttachment = attachmentRepository.findById(attachment.getId());
 
@@ -81,17 +110,11 @@ public class AttachmentResourceTest {
         final Attachment attachment2 = TestAttachments.getRandomValid();
         attachment1.setId(attachment2.getId());
 
-        given().contentType(ContentType.JSON).body(attachment1)
-                .when().post("/support/attachment")
-                .then().statusCode(200);
-
-        given().contentType(ContentType.JSON).body(attachment2)
-                .when().post("/support/attachment")
-                .then().statusCode(409);
+        uploadTestAttachment(attachment1, 200);
+        uploadTestAttachment(attachment2, 409);
 
         final Attachment persistedAttachment = attachmentRepository.findById(attachment1.getId());
         Assertions.assertNotNull(persistedAttachment);
-        Assertions.assertEquals(attachment1, persistedAttachment);
     }
 
     @Test
