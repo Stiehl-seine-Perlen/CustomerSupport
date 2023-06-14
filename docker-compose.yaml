@@ -17,6 +17,10 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: rp-kafka:9092
       QUARKUS_INFINISPAN_CLIENT_USE_AUTH: false
       QUARKUS_INFINISPAN_CLIENT_HOSTS: infinispan:11222
+      MINIO_ACCESSKEY: ${MINIO_ACCESSKEY}
+      MINIO_SECRETKEY: ${MINIO_SECRETKEY}
+      MINIO_BUCKET: support
+      MINIO_ENDPOINT: http://minio:9000
     networks:
       - issue-whisperer
       - kafka
