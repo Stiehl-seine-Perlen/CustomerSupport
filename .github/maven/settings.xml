@@ -17,7 +17,7 @@
         </repository>
         <repository>
           <id>github</id>
-          <url>https://maven.pkg.github.com/Stiehl-seine-Perlen/</url>
+          <url>https://maven.pkg.github.com/Stiehl-seine-Perlen/s3-service</url>
           <snapshots>
             <enabled>true</enabled>
           </snapshots>
