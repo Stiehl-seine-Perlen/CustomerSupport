@@ -1,8 +1,10 @@
 package de.benevolo.customer.support.services;
 
 
+import de.benevolo.customer.support.database.AttachmentRepository;
 import de.benevolo.customer.support.database.SupportIssueMessageRepository;
 import de.benevolo.customer.support.database.SupportIssueRepository;
+import de.benevolo.customer.support.entities.Attachment;
 import de.benevolo.customer.support.entities.SupportIssue;
 import de.benevolo.customer.support.entities.SupportIssueMessage;
 import org.kie.kogito.internal.process.runtime.KogitoProcessContext;
@@ -12,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.util.HashSet;
+import java.util.Set;
 
 @ApplicationScoped
 public class ResolveIssueService {
@@ -21,6 +25,9 @@ public class ResolveIssueService {
 
     @Inject
     SupportIssueMessageRepository messageRepository;
+
+    @Inject
+    AttachmentRepository attachmentRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(ResolveIssueService.class);
 
@@ -40,12 +47,36 @@ public class ResolveIssueService {
     }
 
     @Transactional
+    private Set<Attachment> fetchExistingAttachments(final Set<Attachment> attachments) {
+        final Set<Attachment> fetchedAttachments = new HashSet<>();
+        for (final Attachment attachment : attachments) {
+            final Attachment fetchedAttachment = attachmentRepository.findById(attachment.getId());
+            if (fetchedAttachment != null) {
+                fetchedAttachments.add(fetchedAttachment);
+            }
+        }
+
+        return fetchedAttachments;
+    }
+
+    @Transactional
     public Long addSupportMessageToIssue(final Long issueId, final SupportIssueMessage message) {
         final SupportIssue issue = issueRepository.findById(issueId);
         issue.addMessage(message);
 
         message.setFromCustomer(false);
         messageRepository.persist(message);
+
+        final Set<Attachment> attachments = fetchExistingAttachments(message.getAttachments());
+        for (final Attachment attachment : attachments) {
+            message.addAttachment(attachment);
+        }
+
+        if (message.getAttachments().size() > attachments.size()) {
+            LOG.warn("not all attachments were uploaded successfully: only accepted {} of {} attachments",
+                    attachments.size(),
+                    message.getAttachments().size());
+        }
 
         LOG.info("added message by support team id:{} to support issue id:{}", message.getId(), issueId);
 
@@ -59,6 +90,17 @@ public class ResolveIssueService {
 
         message.setFromCustomer(true);
         messageRepository.persist(message);
+
+        final Set<Attachment> attachments = fetchExistingAttachments(message.getAttachments());
+        for (final Attachment attachment : attachments) {
+            message.addAttachment(attachment);
+        }
+
+        if (message.getAttachments().size() > attachments.size()) {
+            LOG.warn("not all attachments were uploaded successfully: only accepted {} of {} attachments",
+                    attachments.size(),
+                    message.getAttachments().size());
+        }
 
         LOG.info("added message id:{} by customer to support issue id:{}", message.getId(), issueId);
 

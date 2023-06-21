@@ -117,7 +117,7 @@
         <dependency>
             <groupId>de.benevolo</groupId>
             <artifactId>s3-service</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.3</version>
         </dependency>
     </dependencies>
 

@@ -49,7 +49,7 @@ public class SupportIssueMessage implements Comparable<SupportIssueMessage> {
      * All attachments of this message. This contains images, files and other additional content that could
      * help the support team resolving the issue.
      */
-    @OneToMany(mappedBy = "message", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "message")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Attachment> attachments = new HashSet<>();
 
