@@ -178,7 +178,10 @@ public class AttachmentResource {
         try {
             // auto-closable can be ignored because stream is already closed on error
             final InputStream stream = attachmentFileService.downloadAttachmentContent(attachment.getLocation());
-            return Response.ok().entity(stream).build();
+            return Response.ok()
+                    .entity(stream)
+                    .header("Content-Disposition", "attachment; filename=\"" + attachment.getFilename() + "\"")
+                    .build();
         } catch (final Exception e) {
             LOG.error("failed to download attachment file content: {}", e.getMessage(), e);
             return Response.serverError().build();
