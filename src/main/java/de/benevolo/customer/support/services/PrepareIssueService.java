@@ -8,6 +8,7 @@ import de.benevolo.customer.support.entities.Attachment;
 import de.benevolo.customer.support.entities.SupportIssue;
 import de.benevolo.customer.support.entities.SupportIssueMessage;
 import de.benevolo.customer.support.entities.SupportRequest;
+import de.benevolo.email.Email;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,8 +90,17 @@ public class PrepareIssueService {
         return attachments;
     }
 
-    public String generateCustomerNotificationEmail(final SupportRequest request) {
-        return String.format("we will work on your request with title '%s'", request.getTitle());
+    public Email generateCustomerNotificationEmail(final SupportRequest request, final Long issueId) {
+        final String content = String.format("Ihre Anfrage wird bearbeitet. Sie können den Fortschritt <a href='dev.benevolo.de/support-issue/%d/customer'>hier</a> einsehen",
+                issueId);
+
+        return new Email(
+                request.getIssuerEmailAddress(),
+                request.getIssuerEmailAddress(),
+                "Ihr Anliegen wird bearbeitet",
+                content,
+                "jan.vorhoff@outlook.de",
+                "Jan Vorhoff");
     }
 
     public String generateSupportTeamNotification(final SupportRequest request) {
