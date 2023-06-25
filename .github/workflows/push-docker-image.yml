@@ -31,7 +31,7 @@ jobs:
       - name: "Build the maven package"
         env:
           ACCESS_TOKEN: ${{secrets.GH_REGISTRY_ACCESS_PASSWORD}}
-        run: mvn -X -s $GITHUB_WORKSPACE/.github/maven/settings.xml -B package --file pom.xml
+        run: mvn -s $GITHUB_WORKSPACE/.github/maven/settings.xml -B package --file pom.xml
 
       - name: "Build and test issue-whisperer image"
         run: |
