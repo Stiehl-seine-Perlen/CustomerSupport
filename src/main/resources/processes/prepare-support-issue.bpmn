@@ -1,25 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:bpsim="http://www.bpsim.org/schemas/1.0" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:drools="http://www.jboss.org/drools" xmlns:xsi="xsi" id="_8OIq8NXwEDuYBIJGMhFAVw" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd http://www.jboss.org/drools drools.xsd http://www.bpsim.org/schemas/1.0 bpsim.xsd http://www.omg.org/spec/DD/20100524/DC DC.xsd http://www.omg.org/spec/DD/20100524/DI DI.xsd " exporter="jBPM Process Modeler" exporterVersion="2.0" targetNamespace="http://www.omg.org/bpmn20">
+<bpmn2:definitions xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:bpsim="http://www.bpsim.org/schemas/1.0" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:drools="http://www.jboss.org/drools" xmlns:xsi="xsi" id="_0D_bMPWFEDueoohRfZMlgg" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd http://www.jboss.org/drools drools.xsd http://www.bpsim.org/schemas/1.0 bpsim.xsd http://www.omg.org/spec/DD/20100524/DC DC.xsd http://www.omg.org/spec/DD/20100524/DI DI.xsd " exporter="jBPM Process Modeler" exporterVersion="2.0" targetNamespace="http://www.omg.org/bpmn20">
   <bpmn2:itemDefinition id="_requestItem" structureRef="de.benevolo.customer.support.entities.SupportRequest"/>
   <bpmn2:itemDefinition id="_issueIdItem" structureRef="java.lang.Long"/>
-  <bpmn2:itemDefinition id="_customerConfirmationItem" structureRef="String"/>
-  <bpmn2:itemDefinition id="_supportNotificationItem" structureRef="String"/>
+  <bpmn2:itemDefinition id="_customerConfirmationItem" structureRef="de.benevolo.email.Email"/>
+  <bpmn2:itemDefinition id="_supportNotificationItem" structureRef="de.benevolo.email.Email"/>
   <bpmn2:itemDefinition id="_626C0E18-7EEE-4B9D-80AD-EB8A3FA06F37_InMessageType" structureRef=""/>
   <bpmn2:itemDefinition id="_626C0E18-7EEE-4B9D-80AD-EB8A3FA06F37_OutMessageType" structureRef=""/>
   <bpmn2:itemDefinition id="__626C0E18-7EEE-4B9D-80AD-EB8A3FA06F37_requestInputXItem" structureRef="de.benevolo.customer.support.entities.SupportRequest"/>
   <bpmn2:itemDefinition id="__626C0E18-7EEE-4B9D-80AD-EB8A3FA06F37_issueIdOutputXItem" structureRef="java.lang.Long"/>
-  <bpmn2:itemDefinition id="__C80B3BD8-58EF-4F03-9F03-3BD5B1CD2464_customerConfirmationInputXItem" structureRef="String"/>
-  <bpmn2:itemDefinition id="email_outType" structureRef="String"/>
+  <bpmn2:itemDefinition id="__C80B3BD8-58EF-4F03-9F03-3BD5B1CD2464_customerConfirmationInputXItem" structureRef="de.benevolo.email.Email"/>
+  <bpmn2:itemDefinition id="email_outType" structureRef="de.benevolo.email.Email"/>
   <bpmn2:itemDefinition id="__8CA390A5-FD65-4D8E-84AE-C98E4FDB807B_supportNotificationInputXItem" structureRef="String"/>
   <bpmn2:itemDefinition id="email_outType" structureRef="String"/>
   <bpmn2:itemDefinition id="_25275508-C75E-4972-9EA3-53EEC7F2EE55_InMessageType" structureRef=""/>
   <bpmn2:itemDefinition id="_25275508-C75E-4972-9EA3-53EEC7F2EE55_OutMessageType" structureRef=""/>
   <bpmn2:itemDefinition id="__25275508-C75E-4972-9EA3-53EEC7F2EE55_requestInputXItem" structureRef="de.benevolo.customer.support.entities.SupportRequest"/>
-  <bpmn2:itemDefinition id="__25275508-C75E-4972-9EA3-53EEC7F2EE55_customerConfirmationOutputXItem" structureRef="String"/>
+  <bpmn2:itemDefinition id="__25275508-C75E-4972-9EA3-53EEC7F2EE55_issueInputXItem" structureRef="java.lang.Long"/>
+  <bpmn2:itemDefinition id="__25275508-C75E-4972-9EA3-53EEC7F2EE55_customerConfirmationOutputXItem" structureRef="de.benevolo.email.Email"/>
   <bpmn2:itemDefinition id="_B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_InMessageType" structureRef=""/>
   <bpmn2:itemDefinition id="_B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_OutMessageType" structureRef=""/>
   <bpmn2:itemDefinition id="__B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_requestInputXItem" structureRef="de.benevolo.customer.support.entities.SupportRequest"/>
-  <bpmn2:itemDefinition id="__B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_supportNotificationOutputXItem" structureRef="String"/>
+  <bpmn2:itemDefinition id="__B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_issueIdInputXItem" structureRef="java.lang.Long"/>
+  <bpmn2:itemDefinition id="__B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_supportNotificationOutputXItem" structureRef="de.benevolo.email.Email"/>
   <bpmn2:message id="_626C0E18-7EEE-4B9D-80AD-EB8A3FA06F37_InMessage" itemRef="_626C0E18-7EEE-4B9D-80AD-EB8A3FA06F37_InMessageType"/>
   <bpmn2:message id="_626C0E18-7EEE-4B9D-80AD-EB8A3FA06F37_OutMessage" itemRef="_626C0E18-7EEE-4B9D-80AD-EB8A3FA06F37_OutMessageType"/>
   <bpmn2:interface id="_626C0E18-7EEE-4B9D-80AD-EB8A3FA06F37_ServiceInterface" name="de.benevolo.customer.support.services.PrepareIssueService" implementationRef="de.benevolo.customer.support.services.PrepareIssueService">
@@ -28,8 +30,8 @@
       <bpmn2:outMessageRef>_626C0E18-7EEE-4B9D-80AD-EB8A3FA06F37_OutMessage</bpmn2:outMessageRef>
     </bpmn2:operation>
   </bpmn2:interface>
-  <bpmn2:message id="_8OMVUNXwEDuYBIJGMhFAVw" itemRef="email_outType" name="email_out"/>
-  <bpmn2:message id="_8OM8YNXwEDuYBIJGMhFAVw" itemRef="email_outType" name="email_out"/>
+  <bpmn2:message id="_0EDFkPWFEDueoohRfZMlgg" itemRef="email_outType" name="email_out"/>
+  <bpmn2:message id="_0EDFkfWFEDueoohRfZMlgg" itemRef="email_outType" name="email_out"/>
   <bpmn2:message id="_25275508-C75E-4972-9EA3-53EEC7F2EE55_InMessage" itemRef="_25275508-C75E-4972-9EA3-53EEC7F2EE55_InMessageType"/>
   <bpmn2:message id="_25275508-C75E-4972-9EA3-53EEC7F2EE55_OutMessage" itemRef="_25275508-C75E-4972-9EA3-53EEC7F2EE55_OutMessageType"/>
   <bpmn2:interface id="_25275508-C75E-4972-9EA3-53EEC7F2EE55_ServiceInterface" name="de.benevolo.customer.support.services.PrepareIssueService" implementationRef="de.benevolo.customer.support.services.PrepareIssueService">
@@ -46,8 +48,8 @@
       <bpmn2:outMessageRef>_B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_OutMessage</bpmn2:outMessageRef>
     </bpmn2:operation>
   </bpmn2:interface>
-  <bpmn2:collaboration id="_82ACCD07-C5A1-40EC-85BF-DBCF3A65D4E5" name="Default Collaboration">
-    <bpmn2:participant id="_36D86292-60EA-458F-A608-D4294EE992C4" name="Pool Participant" processRef="PrepareSupportIssue"/>
+  <bpmn2:collaboration id="_24FC994E-4ECD-454A-8360-E4C9BE940E77" name="Default Collaboration">
+    <bpmn2:participant id="_E9F716B2-8269-4C1A-9EA3-AAE53FAE6EE8" name="Pool Participant" processRef="PrepareSupportIssue"/>
   </bpmn2:collaboration>
   <bpmn2:process id="PrepareSupportIssue" drools:packageName="de.benevolo.processes" drools:version="1.0" drools:adHoc="false" name="PrepareSupportIssue" isExecutable="true" processType="Public">
     <bpmn2:documentation><![CDATA[This process prepares the support request to be resolved later.]]></bpmn2:documentation>
@@ -74,9 +76,11 @@
       <bpmn2:outgoing>_42CF9427-A9A4-4A15-9EA1-195E890C72A3</bpmn2:outgoing>
       <bpmn2:ioSpecification>
         <bpmn2:dataInput id="_B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_requestInputX" drools:dtype="de.benevolo.customer.support.entities.SupportRequest" itemSubjectRef="__B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_requestInputXItem" name="request"/>
-        <bpmn2:dataOutput id="_B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_supportNotificationOutputX" drools:dtype="String" itemSubjectRef="__B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_supportNotificationOutputXItem" name="supportNotification"/>
+        <bpmn2:dataInput id="_B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_issueIdInputX" drools:dtype="java.lang.Long" itemSubjectRef="__B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_issueIdInputXItem" name="issueId"/>
+        <bpmn2:dataOutput id="_B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_supportNotificationOutputX" drools:dtype="de.benevolo.email.Email" itemSubjectRef="__B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_supportNotificationOutputXItem" name="supportNotification"/>
         <bpmn2:inputSet>
           <bpmn2:dataInputRefs>_B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_requestInputX</bpmn2:dataInputRefs>
+          <bpmn2:dataInputRefs>_B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_issueIdInputX</bpmn2:dataInputRefs>
         </bpmn2:inputSet>
         <bpmn2:outputSet>
           <bpmn2:dataOutputRefs>_B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_supportNotificationOutputX</bpmn2:dataOutputRefs>
@@ -85,6 +89,10 @@
       <bpmn2:dataInputAssociation>
         <bpmn2:sourceRef>request</bpmn2:sourceRef>
         <bpmn2:targetRef>_B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_requestInputX</bpmn2:targetRef>
+      </bpmn2:dataInputAssociation>
+      <bpmn2:dataInputAssociation>
+        <bpmn2:sourceRef>issueId</bpmn2:sourceRef>
+        <bpmn2:targetRef>_B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_issueIdInputX</bpmn2:targetRef>
       </bpmn2:dataInputAssociation>
       <bpmn2:dataOutputAssociation>
         <bpmn2:sourceRef>_B6F4DC1F-2B43-4C9B-A65E-C2D991CFCC69_supportNotificationOutputX</bpmn2:sourceRef>
@@ -101,9 +109,11 @@
       <bpmn2:outgoing>_B840FE45-C384-4B15-9137-6C2979979EB6</bpmn2:outgoing>
       <bpmn2:ioSpecification>
         <bpmn2:dataInput id="_25275508-C75E-4972-9EA3-53EEC7F2EE55_requestInputX" drools:dtype="de.benevolo.customer.support.entities.SupportRequest" itemSubjectRef="__25275508-C75E-4972-9EA3-53EEC7F2EE55_requestInputXItem" name="request"/>
-        <bpmn2:dataOutput id="_25275508-C75E-4972-9EA3-53EEC7F2EE55_customerConfirmationOutputX" drools:dtype="String" itemSubjectRef="__25275508-C75E-4972-9EA3-53EEC7F2EE55_customerConfirmationOutputXItem" name="customerConfirmation"/>
+        <bpmn2:dataInput id="_25275508-C75E-4972-9EA3-53EEC7F2EE55_issueInputX" drools:dtype="java.lang.Long" itemSubjectRef="__25275508-C75E-4972-9EA3-53EEC7F2EE55_issueInputXItem" name="issue"/>
+        <bpmn2:dataOutput id="_25275508-C75E-4972-9EA3-53EEC7F2EE55_customerConfirmationOutputX" drools:dtype="de.benevolo.email.Email" itemSubjectRef="__25275508-C75E-4972-9EA3-53EEC7F2EE55_customerConfirmationOutputXItem" name="customerConfirmation"/>
         <bpmn2:inputSet>
           <bpmn2:dataInputRefs>_25275508-C75E-4972-9EA3-53EEC7F2EE55_requestInputX</bpmn2:dataInputRefs>
+          <bpmn2:dataInputRefs>_25275508-C75E-4972-9EA3-53EEC7F2EE55_issueInputX</bpmn2:dataInputRefs>
         </bpmn2:inputSet>
         <bpmn2:outputSet>
           <bpmn2:dataOutputRefs>_25275508-C75E-4972-9EA3-53EEC7F2EE55_customerConfirmationOutputX</bpmn2:dataOutputRefs>
@@ -112,6 +122,10 @@
       <bpmn2:dataInputAssociation>
         <bpmn2:sourceRef>request</bpmn2:sourceRef>
         <bpmn2:targetRef>_25275508-C75E-4972-9EA3-53EEC7F2EE55_requestInputX</bpmn2:targetRef>
+      </bpmn2:dataInputAssociation>
+      <bpmn2:dataInputAssociation>
+        <bpmn2:sourceRef>issueId</bpmn2:sourceRef>
+        <bpmn2:targetRef>_25275508-C75E-4972-9EA3-53EEC7F2EE55_issueInputX</bpmn2:targetRef>
       </bpmn2:dataInputAssociation>
       <bpmn2:dataOutputAssociation>
         <bpmn2:sourceRef>_25275508-C75E-4972-9EA3-53EEC7F2EE55_customerConfirmationOutputX</bpmn2:sourceRef>
@@ -134,7 +148,7 @@
       <bpmn2:inputSet>
         <bpmn2:dataInputRefs>_8CA390A5-FD65-4D8E-84AE-C98E4FDB807B_supportNotificationInputX</bpmn2:dataInputRefs>
       </bpmn2:inputSet>
-      <bpmn2:messageEventDefinition drools:msgref="email_out" messageRef="_8OM8YNXwEDuYBIJGMhFAVw"/>
+      <bpmn2:messageEventDefinition drools:msgref="email_out" messageRef="_0EDFkfWFEDueoohRfZMlgg"/>
     </bpmn2:intermediateThrowEvent>
     <bpmn2:intermediateThrowEvent id="_C80B3BD8-58EF-4F03-9F03-3BD5B1CD2464" name="Send confirmation to customer">
       <bpmn2:extensionElements>
@@ -144,7 +158,7 @@
       </bpmn2:extensionElements>
       <bpmn2:incoming>_B840FE45-C384-4B15-9137-6C2979979EB6</bpmn2:incoming>
       <bpmn2:outgoing>_B6E020DE-1E8A-40C3-81EB-97276E7A4D14</bpmn2:outgoing>
-      <bpmn2:dataInput id="_C80B3BD8-58EF-4F03-9F03-3BD5B1CD2464_customerConfirmationInputX" drools:dtype="String" itemSubjectRef="__C80B3BD8-58EF-4F03-9F03-3BD5B1CD2464_customerConfirmationInputXItem" name="customerConfirmation"/>
+      <bpmn2:dataInput id="_C80B3BD8-58EF-4F03-9F03-3BD5B1CD2464_customerConfirmationInputX" drools:dtype="de.benevolo.email.Email" itemSubjectRef="__C80B3BD8-58EF-4F03-9F03-3BD5B1CD2464_customerConfirmationInputXItem" name="customerConfirmation"/>
       <bpmn2:dataInputAssociation>
         <bpmn2:sourceRef>customerConfirmation</bpmn2:sourceRef>
         <bpmn2:targetRef>_C80B3BD8-58EF-4F03-9F03-3BD5B1CD2464_customerConfirmationInputX</bpmn2:targetRef>
@@ -152,7 +166,7 @@
       <bpmn2:inputSet>
         <bpmn2:dataInputRefs>_C80B3BD8-58EF-4F03-9F03-3BD5B1CD2464_customerConfirmationInputX</bpmn2:dataInputRefs>
       </bpmn2:inputSet>
-      <bpmn2:messageEventDefinition drools:msgref="email_out" messageRef="_8OMVUNXwEDuYBIJGMhFAVw"/>
+      <bpmn2:messageEventDefinition drools:msgref="email_out" messageRef="_0EDFkPWFEDueoohRfZMlgg"/>
     </bpmn2:intermediateThrowEvent>
     <bpmn2:parallelGateway id="_390BA319-0EE4-4704-B633-13A9860F4227" gatewayDirection="Converging">
       <bpmn2:incoming>_25B37168-C84F-46E1-90F8-0EBDF65C45CF</bpmn2:incoming>
@@ -344,7 +358,7 @@
         </bpsim:Scenario>
       </bpsim:BPSimData>
     </bpmn2:extensionElements>
-    <bpmn2:source>_8OIq8NXwEDuYBIJGMhFAVw</bpmn2:source>
-    <bpmn2:target>_8OIq8NXwEDuYBIJGMhFAVw</bpmn2:target>
+    <bpmn2:source>_0D_bMPWFEDueoohRfZMlgg</bpmn2:source>
+    <bpmn2:target>_0D_bMPWFEDueoohRfZMlgg</bpmn2:target>
   </bpmn2:relationship>
 </bpmn2:definitions>

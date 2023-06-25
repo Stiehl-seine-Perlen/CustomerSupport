@@ -119,6 +119,12 @@
             <artifactId>s3-service</artifactId>
             <version>1.0.3</version>
         </dependency>
+
+        <dependency>
+            <groupId>de.benevolo</groupId>
+            <artifactId>mail-service</artifactId>
+            <version>1.5</version>
+        </dependency>
     </dependencies>
 
     <build>

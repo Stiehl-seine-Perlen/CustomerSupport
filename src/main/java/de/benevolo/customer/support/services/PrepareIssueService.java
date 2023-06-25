@@ -1,6 +1,5 @@
 package de.benevolo.customer.support.services;
 
-
 import de.benevolo.customer.support.database.AttachmentRepository;
 import de.benevolo.customer.support.database.SupportIssueMessageRepository;
 import de.benevolo.customer.support.database.SupportIssueRepository;
@@ -8,6 +7,7 @@ import de.benevolo.customer.support.entities.Attachment;
 import de.benevolo.customer.support.entities.SupportIssue;
 import de.benevolo.customer.support.entities.SupportIssueMessage;
 import de.benevolo.customer.support.entities.SupportRequest;
+import de.benevolo.email.Email;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,11 +37,12 @@ public class PrepareIssueService {
     @Inject
     Validator validator;
 
-
     /**
-     * Creates a new support issue from a support request and also generate the first message by the customer.
+     * Creates a new support issue from a support request and also generate the
+     * first message by the customer.
      *
-     * @param request the request which will be converted to the support issue and its content
+     * @param request the request which will be converted to the support issue and
+     *                its content
      * @return the id of the created support issue
      * @author Daniel Mehlber
      */
@@ -55,8 +56,10 @@ public class PrepareIssueService {
         // convert attachment ids to attachments
         final Set<Attachment> firstMessageAttachments = fetchAttachmentsByIds(request.getAttachmentsIds());
 
-        // create the first message of the issue using attachments and the request message
-        final SupportIssueMessage firstMessage = new SupportIssueMessage(request.getMessage(), firstMessageAttachments, false);
+        // create the first message of the issue using attachments and the request
+        // message
+        final SupportIssueMessage firstMessage = new SupportIssueMessage(request.getMessage(), firstMessageAttachments,
+                false);
         firstMessage.setFromCustomer(true);
         LOG.debug("created first support issue message with {} attachments", firstMessageAttachments.size());
 
@@ -82,18 +85,39 @@ public class PrepareIssueService {
                 .collect(Collectors.toSet());
 
         if (attachments.size() != attachmentsIds.size()) {
-            LOG.warn("some attachments were not uploaded correctly: found {} ids in request, but only {} matching attachments",
+            LOG.warn(
+                    "some attachments were not uploaded correctly: found {} ids in request, but only {} matching attachments",
                     attachmentsIds.size(), attachments.size());
         }
 
         return attachments;
     }
 
-    public String generateCustomerNotificationEmail(final SupportRequest request) {
-        return String.format("we will work on your request with title '%s'", request.getTitle());
+    public Email generateCustomerNotificationEmail(final SupportRequest request, final Long issueId) {
+        final String content = String.format(
+                "Ihre Anfrage wird bearbeitet. Sie können den Fortschritt <a href='dev.benevolo.de/support-issue/%d/customer'>hier</a> einsehen",
+                issueId);
+
+        return new Email(
+                request.getIssuerEmailAddress(),
+                request.getIssuerEmailAddress(),
+                "Ihr Anliegen wird bearbeitet",
+                content,
+                "jan.vorhoff@outlook.de",
+                "Jan Vorhoff");
     }
 
-    public String generateSupportTeamNotification(final SupportRequest request) {
-        return String.format("we have a new issue named '%s'", request.getTitle());
+    public Email generateSupportTeamNotification(final SupportRequest request, final Long issueId) {
+        final String content = String.format(
+                "Eine neue Anfrage wurde gestellt: Sie muss <a href='dev.benevolo.de/support-issue/%d/customer'>hier</a> bearneitet werden",
+                issueId);
+
+        return new Email(
+                "support@benevolo.de",
+                "Benevolo Support",
+                "Neues Issue",
+                content,
+                "jan.vorhoff@outlook.de",
+                "Jan Vorhoff");
     }
 }
