@@ -10,9 +10,11 @@ import de.benevolo.customer.support.entities.testdata.TestCustomerFeedback;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssueMessages;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.kie.kogito.Model;
-import org.kie.kogito.internal.process.runtime.KogitoNode;
 import org.kie.kogito.process.Process;
 import org.kie.kogito.process.ProcessInstance;
 import org.kie.kogito.process.WorkItem;
@@ -21,6 +23,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
 import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @QuarkusTest
 public class CustomerSupportProcessTest {
@@ -108,28 +113,30 @@ public class CustomerSupportProcessTest {
     @DisplayName("the happy path should work")
     @Transactional
     public void happyPath() {
+        // -- ARRANGE --
         final ProcessInstance<?> customerSupportInstance = startBySendingRequest();
         final ProcessInstance<?> resolveIssueInstance = resolveIssueProcess.instances().stream().findFirst().orElse(null);
-        Assertions.assertNotNull(resolveIssueInstance);
+        assertNotNull(resolveIssueInstance);
 
+        // -- ACT & ASSERT --
         // perform chat between customer and support team
         performAnswerBySupportTeam(resolveIssueInstance);
         performAnswerByCustomer(resolveIssueInstance, false);
         performAnswerBySupportTeam(resolveIssueInstance);
         performAnswerByCustomer(resolveIssueInstance, true);
 
-        Assertions.assertEquals(ProcessInstance.STATE_COMPLETED, resolveIssueInstance.status());
+        assertEquals(ProcessInstance.STATE_COMPLETED, resolveIssueInstance.status());
 
         // finalize issue
         final ProcessInstance<?> finalizeIssueInstance = finalizeIssueProcess.instances().stream().findFirst().orElse(null);
         performCustomerFeedback(finalizeIssueInstance);
 
-        Assertions.assertEquals(ProcessInstance.STATE_COMPLETED, finalizeIssueInstance.status());
-        Assertions.assertEquals(ProcessInstance.STATE_COMPLETED, customerSupportInstance.status());
+        assertEquals(ProcessInstance.STATE_COMPLETED, finalizeIssueInstance.status());
+        assertEquals(ProcessInstance.STATE_COMPLETED, customerSupportInstance.status());
     }
 
     private ProcessInstance<?> startBySendingRequest() {
-        Assertions.assertNotNull(customerSupportProcess);
+        assertNotNull(customerSupportProcess);
 
         // prepare parameters and process model
         final Map<String, Object> parameters = generateValidParameters();
@@ -144,32 +151,32 @@ public class CustomerSupportProcessTest {
         final SupportRequest sentRequest = (SupportRequest) parameters.get("request");
 
         final List<SupportIssue> issues = fetchAllSupportIssues();
-        Assertions.assertNotNull(issues);
-        Assertions.assertEquals(1, issues.size(), "1 issue should have been created");
+        assertNotNull(issues);
+        assertEquals(1, issues.size(), "1 issue should have been created");
 
         final SupportIssue createdIssue = issues.get(0);
-        Assertions.assertEquals(sentRequest.getIssuerEmailAddress(), createdIssue.getIssuerEmailAddress(), "wrong issuer email");
-        Assertions.assertEquals(sentRequest.getTitle(), createdIssue.getTitle(), "wrong title");
-        Assertions.assertEquals(SupportIssueStatus.OPEN, createdIssue.getStatus());
-        Assertions.assertEquals(1, createdIssue.getMessages().size(), "1 message should be in issue");
+        assertEquals(sentRequest.getIssuerEmailAddress(), createdIssue.getIssuerEmailAddress(), "wrong issuer email");
+        assertEquals(sentRequest.getTitle(), createdIssue.getTitle(), "wrong title");
+        assertEquals(SupportIssueStatus.OPEN, createdIssue.getStatus());
+        assertEquals(1, createdIssue.getMessages().size(), "1 message should be in issue");
 
         final SupportIssueMessage message = createdIssue.getMessages().stream().findFirst().orElse(null);
-        Assertions.assertNotNull(message);
-        Assertions.assertEquals(sentRequest.getMessage(), message.getMessage(), "wrong message");
-        Assertions.assertEquals(attachmentCount, message.getAttachments().size(), "wrong count of attachments in first message");
+        assertNotNull(message);
+        assertEquals(sentRequest.getMessage(), message.getMessage(), "wrong message");
+        assertEquals(attachmentCount, message.getAttachments().size(), "wrong count of attachments in first message");
 
         final long incorrectIdsCount = message.getAttachments().stream()
                 .map(Attachment::getId)
                 .filter(id -> !currentAttachmentIds.contains(id))
                 .count();
 
-        Assertions.assertEquals(0, incorrectIdsCount);
+        assertEquals(0, incorrectIdsCount);
 
         return instance;
     }
 
     private void performAnswerBySupportTeam(final ProcessInstance<?> resolveProcessInstance) {
-        Assertions.assertNotNull(resolveProcessInstance);
+        assertNotNull(resolveProcessInstance);
 
         // triggerWriteReplyToCustomerTask(resolveProcessInstance);
         final String currentUserTaskId = findCurrentUserTask(resolveProcessInstance, "WriteReplyToCustomer");
@@ -181,23 +188,23 @@ public class CustomerSupportProcessTest {
 
         // send reply by support team
         final SupportIssue currentIssue = fetchAllSupportIssues().stream().findFirst().orElse(null);
-        Assertions.assertNotNull(currentIssue);
+        assertNotNull(currentIssue);
         final long messageCountBeforeAnswer = currentIssue.getMessages().size();
         resolveProcessInstance.completeWorkItem(currentUserTaskId, parameters);
 
         // assertions
-        Assertions.assertEquals(SupportIssueStatus.IN_WORK, currentIssue.getStatus(), "issue has wrong status");
+        assertEquals(SupportIssueStatus.IN_WORK, currentIssue.getStatus(), "issue has wrong status");
 
         final List<SupportIssueMessage> messages = currentIssue.getMessages();
-        Assertions.assertEquals(messageCountBeforeAnswer + 1, messages.size(), "message has not been added");
+        assertEquals(messageCountBeforeAnswer + 1, messages.size(), "message has not been added");
 
         final SupportIssueMessage latestMessage = extractLatestMessage(messages);
-        Assertions.assertEquals(replyToCustomer, latestMessage);
-        Assertions.assertEquals(false, latestMessage.isFromCustomer(), "message must be from support team, not customer");
+        assertEquals(replyToCustomer, latestMessage);
+        assertEquals(false, latestMessage.isFromCustomer(), "message must be from support team, not customer");
     }
 
     private void performAnswerByCustomer(final ProcessInstance<?> resolveProcessInstance, final boolean messageResolvesIssue) {
-        Assertions.assertNotNull(resolveProcessInstance);
+        assertNotNull(resolveProcessInstance);
 
         // trigger and get current user task
         // triggerWriteReplyToSupportTask(resolveProcessInstance);
@@ -212,27 +219,27 @@ public class CustomerSupportProcessTest {
 
         // send answer
         final SupportIssue currentIssue = fetchAllSupportIssues().stream().findFirst().orElse(null);
-        Assertions.assertNotNull(currentIssue);
+        assertNotNull(currentIssue);
         final long messageCountBeforeAnswer = currentIssue.getMessages().size();
         resolveProcessInstance.completeWorkItem(currentUserTaskId, parameters);
 
         // assertions
         if (messageResolvesIssue) {
-            Assertions.assertEquals(SupportIssueStatus.CLOSED, currentIssue.getStatus(), "issue has wrong status");
+            assertEquals(SupportIssueStatus.CLOSED, currentIssue.getStatus(), "issue has wrong status");
         } else {
-            Assertions.assertEquals(SupportIssueStatus.IN_WORK, currentIssue.getStatus(), "issue has wrong status");
+            assertEquals(SupportIssueStatus.IN_WORK, currentIssue.getStatus(), "issue has wrong status");
         }
 
         final List<SupportIssueMessage> messages = currentIssue.getMessages();
-        Assertions.assertEquals(messageCountBeforeAnswer + 1, messages.size(), "message has not been added");
+        assertEquals(messageCountBeforeAnswer + 1, messages.size(), "message has not been added");
 
         final SupportIssueMessage latestMessage = extractLatestMessage(messages);
-        Assertions.assertEquals(replyToCustomer, latestMessage);
-        Assertions.assertEquals(true, latestMessage.isFromCustomer(), "message must be from support team, not customer");
+        assertEquals(replyToCustomer, latestMessage);
+        assertEquals(true, latestMessage.isFromCustomer(), "message must be from support team, not customer");
     }
 
     private void performCustomerFeedback(final ProcessInstance<?> finalizeIssueInstance) {
-        Assertions.assertNotNull(finalizeIssueInstance);
+        assertNotNull(finalizeIssueInstance);
 
         // get current user task
         final String currentUserTaskId = findCurrentUserTask(finalizeIssueInstance, "Feedback");
@@ -246,29 +253,10 @@ public class CustomerSupportProcessTest {
         finalizeIssueInstance.completeWorkItem(currentUserTaskId, parameters);
     }
 
-
-    private void triggerWriteReplyToSupportTask(final ProcessInstance<?> resolveIssueInstance) {
-        // I added additional metadata to the user task node (in the BPMN editor) in order to identify the node here
-        final KogitoNode taskNode = resolveIssueInstance.process().findNodes(node -> "WriteReplyToSupport".equals(node.getMetaData().get("debugTaskName")))
-                .stream().findFirst().orElse(null);
-
-        Assertions.assertNotNull(taskNode);
-        resolveIssueInstance.triggerNode(taskNode.getNodeUniqueId());
-    }
-
-    private void triggerWriteReplyToCustomerTask(final ProcessInstance<?> resolveIssueInstance) {
-        // I added additional metadata to the user task node (in the BPMN editor) in order to identify the node here
-        final KogitoNode taskNode = resolveIssueInstance.process().findNodes(node -> "WriteReplyToCustomer".equals(node.getMetaData().get("debugTaskName")))
-                .stream().findFirst().orElse(null);
-
-        Assertions.assertNotNull(taskNode);
-        resolveIssueInstance.triggerNode(taskNode.getNodeUniqueId());
-    }
-
     private String findCurrentUserTask(final ProcessInstance<?> instance, final String name) {
         final WorkItem currentUserTask = instance.workItems().stream().filter(item -> item.getName().equals(name)).findFirst().orElse(null);
-        Assertions.assertNotNull(currentUserTask);
-        Assertions.assertEquals(name, currentUserTask.getName(), "current user task should be " + name);
+        assertNotNull(currentUserTask);
+        assertEquals(name, currentUserTask.getName(), "current user task should be " + name);
         return currentUserTask.getId();
     }
 

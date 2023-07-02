@@ -24,13 +24,12 @@ public class FinalizeIssueService {
     private static final Logger LOG = LoggerFactory.getLogger(FinalizeIssueService.class);
 
     @Transactional
-    public Long processCustomerFeedback(final Long issueId, final CustomerFeedback feedback) {
+    public void processCustomerFeedback(final Long issueId, final CustomerFeedback feedback) {
         final SupportIssue issue = issueRepository.findById(issueId);
-        feedback.setIssue(issue);
+        issue.setFeedback(feedback);
 
         feedbackRepository.persist(feedback);
 
-        return feedback.getId();
     }
 
     /**

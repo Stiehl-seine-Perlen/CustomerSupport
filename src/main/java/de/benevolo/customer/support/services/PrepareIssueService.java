@@ -76,7 +76,7 @@ public class PrepareIssueService {
     }
 
     @Transactional
-    Set<Attachment> fetchAttachmentsByIds(final Set<UUID> attachmentsIds) {
+    public Set<Attachment> fetchAttachmentsByIds(final Set<UUID> attachmentsIds) {
         LOG.debug("fetching {} attachments by their ids", attachmentsIds.size());
 
         final Set<Attachment> attachments = attachmentsIds.stream()

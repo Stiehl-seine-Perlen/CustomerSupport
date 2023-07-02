@@ -148,6 +148,9 @@ public class SupportIssueMessage implements Comparable<SupportIssueMessage> {
         attachment.setMessage(this);
     }
 
+
+    // ignores related entities (due to JPA) and only compares direct attributes.
+    // and yes, its reflexive, symmetric and transitive
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;

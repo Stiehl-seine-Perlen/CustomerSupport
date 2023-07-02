@@ -25,7 +25,7 @@ public interface AttachmentFileService {
             }
         }
 
-        return "unnamed-file";
+        return "";
     }
 
 }

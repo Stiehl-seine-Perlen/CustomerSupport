@@ -97,6 +97,8 @@ public class CustomerFeedback {
         this.creation = creation;
     }
 
+    // ignores related entities (due to JPA) and only compares direct attributes
+    // and yes, its reflexive, symmetric and transitive
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;

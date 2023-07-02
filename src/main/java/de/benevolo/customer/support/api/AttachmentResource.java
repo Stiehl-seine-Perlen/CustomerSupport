@@ -109,6 +109,7 @@ public class AttachmentResource {
 
     @DELETE
     @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "deleted loose attachment",
             description = "The attachment is deleted, if it is not attached to any message and therefore unused")
     @APIResponses({
@@ -160,6 +161,7 @@ public class AttachmentResource {
 
     @GET
     @Path("{id}/download")
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "get content of attachment file",
             description = "Returns the attachment file content with the selected id")
     @APIResponses({
@@ -178,10 +180,17 @@ public class AttachmentResource {
         try {
             // auto-closable can be ignored because stream is already closed on error
             final InputStream stream = attachmentFileService.downloadAttachmentContent(attachment.getLocation());
-            return Response.ok()
+            final Response response = Response.ok()
                     .entity(stream)
                     .header("Content-Disposition", "attachment; filename=\"" + attachment.getFilename() + "\"")
                     .build();
+
+            // close stream before returning
+            if (stream != null) {
+                stream.close();
+            }
+
+            return response;
         } catch (final Exception e) {
             LOG.error("failed to download attachment file content: {}", e.getMessage(), e);
             return Response.serverError().build();
