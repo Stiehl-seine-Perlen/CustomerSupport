@@ -74,9 +74,9 @@ public class SupportIssueMessage implements Comparable<SupportIssueMessage> {
     }
 
     @JsonCreator
-    public SupportIssueMessage(@JsonProperty(required = true) final String message,
-                               @JsonProperty(required = true) final Set<Attachment> attachments,
-                               @JsonProperty(required = true) final Boolean hasResolvedIssue) {
+    public SupportIssueMessage(@JsonProperty(required = true, value = "message") final String message,
+                               @JsonProperty(required = true, value = "attachments") final Set<Attachment> attachments,
+                               @JsonProperty(required = true, value = "hasResolvedIssue") final Boolean hasResolvedIssue) {
         this.message = message;
         attachments.forEach(this::addAttachment);
         this.attachments = attachments;

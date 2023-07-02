@@ -50,13 +50,13 @@ public class SupportIssue {
 
     private String resolveIssueProcessId;
 
-    protected SupportIssue() {
+    public SupportIssue() {
     }
 
     @JsonCreator
-    public SupportIssue(@JsonProperty(required = true) final String title,
-                        @JsonProperty(required = true) final String issuerEmailAddress,
-                        @JsonProperty(required = true) final SupportIssueStatus status) {
+    public SupportIssue(@JsonProperty(required = true, value = "title") final String title,
+                        @JsonProperty(required = true, value = "issuerEmailAddress") final String issuerEmailAddress,
+                        @JsonProperty(required = true, value = "status") final SupportIssueStatus status) {
         this.title = title;
         this.issuerEmailAddress = issuerEmailAddress;
         this.status = status;
@@ -67,6 +67,7 @@ public class SupportIssue {
         this.issuerEmailAddress = request.getIssuerEmailAddress();
         this.status = SupportIssueStatus.OPEN;
     }
+
 
     public void open() {
         this.openSince = LocalDateTime.now();
