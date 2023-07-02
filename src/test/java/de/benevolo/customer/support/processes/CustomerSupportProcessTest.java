@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.kogito.Model;
-import org.kie.kogito.internal.process.runtime.KogitoNode;
 import org.kie.kogito.process.Process;
 import org.kie.kogito.process.ProcessInstance;
 import org.kie.kogito.process.WorkItem;
@@ -252,25 +251,6 @@ public class CustomerSupportProcessTest {
 
         // send feedback
         finalizeIssueInstance.completeWorkItem(currentUserTaskId, parameters);
-    }
-
-
-    private void triggerWriteReplyToSupportTask(final ProcessInstance<?> resolveIssueInstance) {
-        // I added additional metadata to the user task node (in the BPMN editor) in order to identify the node here
-        final KogitoNode taskNode = resolveIssueInstance.process().findNodes(node -> "WriteReplyToSupport".equals(node.getMetaData().get("debugTaskName")))
-                .stream().findFirst().orElse(null);
-
-        assertNotNull(taskNode);
-        resolveIssueInstance.triggerNode(taskNode.getNodeUniqueId());
-    }
-
-    private void triggerWriteReplyToCustomerTask(final ProcessInstance<?> resolveIssueInstance) {
-        // I added additional metadata to the user task node (in the BPMN editor) in order to identify the node here
-        final KogitoNode taskNode = resolveIssueInstance.process().findNodes(node -> "WriteReplyToCustomer".equals(node.getMetaData().get("debugTaskName")))
-                .stream().findFirst().orElse(null);
-
-        assertNotNull(taskNode);
-        resolveIssueInstance.triggerNode(taskNode.getNodeUniqueId());
     }
 
     private String findCurrentUserTask(final ProcessInstance<?> instance, final String name) {

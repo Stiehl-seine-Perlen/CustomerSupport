@@ -26,7 +26,7 @@ public class FinalizeIssueService {
     @Transactional
     public void processCustomerFeedback(final Long issueId, final CustomerFeedback feedback) {
         final SupportIssue issue = issueRepository.findById(issueId);
-        feedback.setIssue(issue);
+        issue.setFeedback(feedback);
 
         feedbackRepository.persist(feedback);
 

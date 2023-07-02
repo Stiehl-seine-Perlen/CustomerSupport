@@ -11,6 +11,7 @@ import de.benevolo.customer.support.entities.testdata.TestSupportIssueMessages;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,14 @@ public class AttachmentResourceTest {
     @BeforeEach
     @Transactional
     public void prepare() {
+        attachmentRepository.deleteAll();
+        messageRepository.deleteAll();
+        issueRepository.deleteAll();
+    }
+
+    @AfterEach
+    @Transactional
+    public void cleanUp() {
         attachmentRepository.deleteAll();
         messageRepository.deleteAll();
         issueRepository.deleteAll();

@@ -1,6 +1,7 @@
 package de.benevolo.customer.support.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -37,6 +38,7 @@ public class SupportIssue {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<SupportIssueMessage> messages = new LinkedList<>();
 
+    @JsonIgnore
     @OneToOne(mappedBy = "issue", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private CustomerFeedback feedback;
 
