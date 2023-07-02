@@ -1,5 +1,6 @@
 package de.benevolo.customer.support.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.benevolo.customer.support.database.SupportIssueRepository;
 import de.benevolo.customer.support.entities.SupportIssue;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
@@ -8,7 +9,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;

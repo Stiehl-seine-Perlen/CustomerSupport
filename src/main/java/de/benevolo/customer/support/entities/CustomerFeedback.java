@@ -47,9 +47,10 @@ public class CustomerFeedback {
     protected CustomerFeedback() {
     }
 
+    
     @JsonCreator
-    public CustomerFeedback(@JsonProperty(required = true) final short ratingStars,
-                            @JsonProperty(required = false) final String message) {
+    public CustomerFeedback(@JsonProperty(required = true, value = "ratingStars") final short ratingStars,
+                            @JsonProperty(required = false, value = "message") final String message) {
         this.message = message;
         this.ratingStars = ratingStars;
     }

@@ -37,9 +37,9 @@ public class Attachment {
     private SupportIssueMessage message;
 
     @JsonCreator
-    public Attachment(@JsonProperty final UUID id,
-                      @JsonProperty final String filename,
-                      @JsonProperty final String location) {
+    public Attachment(@JsonProperty("id") final UUID id,
+                      @JsonProperty("filename") final String filename,
+                      @JsonProperty("location") final String location) {
         this.filename = filename;
         this.id = id;
         this.location = location;
