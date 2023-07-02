@@ -8,4 +8,5 @@ import java.util.UUID;
 
 @ApplicationScoped
 public class AttachmentRepository implements PanacheRepositoryBase<Attachment, UUID> {
+    // auto-implement
 }

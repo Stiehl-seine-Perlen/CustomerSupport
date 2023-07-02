@@ -6,7 +6,10 @@ import de.benevolo.customer.support.entities.testdata.TestAttachments;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssueMessages;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -15,6 +18,8 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.util.List;
 import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 public class SupportIssueMessageTest {
@@ -58,7 +63,7 @@ public class SupportIssueMessageTest {
 
         for (final SupportIssueMessage message : validMessages) {
             final Set<ConstraintViolation<SupportIssueMessage>> violations = validator.validate(message);
-            Assertions.assertEquals(0, violations.size(), "there are violations in valid messages");
+            assertEquals(0, violations.size(), "there are violations in valid messages");
         }
     }
 
@@ -69,7 +74,7 @@ public class SupportIssueMessageTest {
 
         for (final SupportIssueMessage message : invalidMessages) {
             final Set<ConstraintViolation<SupportIssueMessage>> violations = validator.validate(message);
-            Assertions.assertNotEquals(0, violations.size(), "there are no violations in invalid messages");
+            assertNotEquals(0, violations.size(), "there are no violations in invalid messages");
         }
     }
 
@@ -77,39 +82,44 @@ public class SupportIssueMessageTest {
     @DisplayName("creating a message with issue should work")
     @Transactional
     public void createWithIssue() {
+        // -- ARRANGE --
         final SupportIssueMessage originalMessage = TestSupportIssueMessages.getRandomValid();
 
         // attach to issue parent
         final SupportIssue currentIssue = issueRepository.findById(currentSupportIssueId);
         currentIssue.addMessage(originalMessage);
 
+        // -- ACT --
         // pass message instance to the entity manager
         messageRepository.persist(originalMessage);
-
-        // execute database operations
         entityManager.flush();
 
+        // -- ASSERT --
         final SupportIssueMessage persistedMessage = messageRepository.findById(originalMessage.getId());
-        Assertions.assertEquals(originalMessage, persistedMessage);
+        assertEquals(originalMessage, persistedMessage);
     }
 
     @Test
     @DisplayName("creating a message without issue should fail")
     @Transactional
     public void createWithoutIssue() {
+        // -- ARRANGE --
         final SupportIssueMessage originalMessage = TestSupportIssueMessages.getRandomValid();
 
+        // -- ACT --
         // pass message instance to the entity manager
         messageRepository.persist(originalMessage);
 
+        // -- ASSERT --
         // execute database operations (should fail)
-        Assertions.assertThrows(Exception.class, () -> entityManager.flush());
+        assertThrows(Exception.class, () -> entityManager.flush());
     }
 
     @Test
     @DisplayName("testing relation to attachments")
     @Transactional
     public void changeMessageAttachments() {
+        // -- ARRANGE --
         final SupportIssueMessage originalMessage = TestSupportIssueMessages.getRandomValid();
 
         // attach to issue parent
@@ -130,16 +140,16 @@ public class SupportIssueMessageTest {
 
         // fetch created message again
         SupportIssueMessage persistedMessage = messageRepository.findById(originalMessage.getId());
-        Assertions.assertEquals(attachmentCount, persistedMessage.getAttachments().size());
+        assertEquals(attachmentCount, persistedMessage.getAttachments().size());
 
+        // -- ACT --
         // add another attachment
         final Attachment attachment = TestAttachments.getRandomValid();
         persistedMessage.addAttachment(attachment);
-
-        // write to database
         entityManager.flush();
 
+        // -- ASSERT --
         persistedMessage = messageRepository.findById(originalMessage.getId());
-        Assertions.assertEquals(attachmentCount + 1, persistedMessage.getAttachments().size());
+        assertEquals(attachmentCount + 1, persistedMessage.getAttachments().size());
     }
 }

@@ -10,8 +10,10 @@ import de.benevolo.customer.support.entities.testdata.TestAttachments;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssueMessages;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
-import org.jboss.logging.Logger;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -21,11 +23,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @QuarkusTest
 public class PrepareIssueServiceTest {
-
-    @Inject
-    Logger log;
 
     @Inject
     PrepareIssueService service;
@@ -63,6 +64,7 @@ public class PrepareIssueServiceTest {
     @Test
     @DisplayName("should create issue from valid support request")
     public void requestToIssue() {
+        // -- ARRANGE --
         // prepare test data
         final SupportIssue someIssue = TestSupportIssues.getRandomValid();
         final SupportIssueMessage someMessage = TestSupportIssueMessages.getRandomValid();
@@ -83,33 +85,36 @@ public class PrepareIssueServiceTest {
                 someIssue.getIssuerEmailAddress(),
                 attachmentIds);
 
+        // -- ACT --
         // use service to create issue
         final Long issueId = service.createSupportIssue(validRequest);
 
+        // -- ASSERT --
         // assert correctness
         final SupportIssue persistedIssue = loadIssue(issueId);
-        Assertions.assertNotNull(persistedIssue);
-        Assertions.assertEquals(someIssue.getTitle(), persistedIssue.getTitle(), "incorrect title persisted");
-        Assertions.assertEquals(someIssue.getIssuerEmailAddress(), persistedIssue.getIssuerEmailAddress(), "incorrect email persisted");
-        Assertions.assertEquals(SupportIssueStatus.OPEN, persistedIssue.getStatus());
+        assertNotNull(persistedIssue);
+        assertEquals(someIssue.getTitle(), persistedIssue.getTitle(), "incorrect title persisted");
+        assertEquals(someIssue.getIssuerEmailAddress(), persistedIssue.getIssuerEmailAddress(), "incorrect email persisted");
+        assertEquals(SupportIssueStatus.OPEN, persistedIssue.getStatus());
 
         final List<SupportIssueMessage> persistedMessages = persistedIssue.getMessages();
-        Assertions.assertNotNull(persistedMessages, "set of messages was null");
-        Assertions.assertEquals(1, persistedMessages.size(), "there must be exactly 1 message after creation");
+        assertNotNull(persistedMessages, "set of messages was null");
+        assertEquals(1, persistedMessages.size(), "there must be exactly 1 message after creation");
 
         final SupportIssueMessage persistedFirstMessage = persistedMessages.stream().findFirst().orElse(null);
-        Assertions.assertNotNull(persistedFirstMessage, "first message must not be null");
-        Assertions.assertEquals(someMessage.getMessage(), persistedFirstMessage.getMessage(), "wrong message content persisted");
-        Assertions.assertTrue(persistedFirstMessage.isFromCustomer(), "first message must be from customer");
+        assertNotNull(persistedFirstMessage, "first message must not be null");
+        assertEquals(someMessage.getMessage(), persistedFirstMessage.getMessage(), "wrong message content persisted");
+        assertTrue(persistedFirstMessage.isFromCustomer(), "first message must be from customer");
 
         final Set<Attachment> persistedAttachments = persistedFirstMessage.getAttachments();
-        Assertions.assertNotNull(persistedAttachments, "attachments must not be null");
-        Assertions.assertEquals(attachments.size(), persistedAttachments.size(), "not enough attachments were persisted");
+        assertNotNull(persistedAttachments, "attachments must not be null");
+        assertEquals(attachments.size(), persistedAttachments.size(), "not enough attachments were persisted");
     }
 
     @Test
     @DisplayName("should not create issue from invalid support request")
     public void invalidRequestToIssue() {
+        // -- ARRANGE --
         // prepare test data
         final SupportIssue someIssue = TestSupportIssues.getRandomInvalid();
         final SupportIssueMessage someMessage = TestSupportIssueMessages.getRandomInvalid();
@@ -130,13 +135,13 @@ public class PrepareIssueServiceTest {
                 someIssue.getIssuerEmailAddress(),
                 attachmentIds);
 
+        // -- ACT & ASSERT --
         // use service to create issue
-        Assertions.assertThrows(Exception.class, () -> service.createSupportIssue(validRequest));
+        assertThrows(Exception.class, () -> service.createSupportIssue(validRequest));
     }
 
     @Transactional
     void persistAttachments(final Set<Attachment> attachments) {
-        log.debugf("persisting %d attachments", attachments.size());
         for (final Attachment attachment : attachments) {
             attachmentRepository.persist(attachment);
         }
@@ -147,7 +152,7 @@ public class PrepareIssueServiceTest {
         final SupportIssue issue = issueRepository.findById(issueId);
 
         // force loading all children (due to lazy loading) and assert that issue is not null
-        Assertions.assertDoesNotThrow(() -> issue.getMessages()
+        assertDoesNotThrow(() -> issue.getMessages()
                 .forEach(message -> message.getAttachments()
                         .forEach(Attachment::getId)));
 

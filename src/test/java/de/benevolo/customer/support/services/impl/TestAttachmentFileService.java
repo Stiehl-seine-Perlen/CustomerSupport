@@ -21,7 +21,7 @@ import java.util.UUID;
 @Mock
 public class TestAttachmentFileService implements AttachmentFileService {
 
-    Map<String, byte[]> files = new HashMap<>();
+    private final Map<String, byte[]> files = new HashMap<>();
 
     @Override
     public String uploadAttachmentContent(final InputPart fileInputPart, final int fileInputSize) throws Exception {

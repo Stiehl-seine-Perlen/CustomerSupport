@@ -5,7 +5,10 @@ import de.benevolo.customer.support.database.SupportIssueRepository;
 import de.benevolo.customer.support.entities.testdata.TestCustomerFeedback;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -14,6 +17,8 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.util.List;
 import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 public class CustomerFeedbackTest {
@@ -58,7 +63,7 @@ public class CustomerFeedbackTest {
 
         for (final CustomerFeedback feedback : feedbacks) {
             final Set<ConstraintViolation<CustomerFeedback>> violations = validator.validate(feedback);
-            Assertions.assertEquals(0, violations.size(), "violations found on valid feedback");
+            assertEquals(0, violations.size(), "violations found on valid feedback");
         }
     }
 
@@ -66,8 +71,10 @@ public class CustomerFeedbackTest {
     @DisplayName("CRUD operations should work")
     @Transactional
     public void crud() {
+        // -- ARRANGE --
         final CustomerFeedback originalFeedback = TestCustomerFeedback.getRandomValid();
 
+        // -- ACT --
         final SupportIssue issue = supportIssueRepository.findById(currentIssueId);
         issue.setFeedback(originalFeedback);
 
@@ -75,14 +82,17 @@ public class CustomerFeedbackTest {
         entityManager.flush();
 
         final CustomerFeedback persistedCustomerFeedback = feedbackRepository.findById(originalFeedback.getId());
-        Assertions.assertNotNull(persistedCustomerFeedback);
-        Assertions.assertEquals(originalFeedback, persistedCustomerFeedback);
+
+        // -- ASSERT --
+        assertNotNull(persistedCustomerFeedback);
+        assertEquals(originalFeedback, persistedCustomerFeedback);
     }
 
     @Test
     @DisplayName("deleting the issue should delete the feedback as well")
     @Transactional
     public void cascadeDelete() {
+        // -- ARRANGE --
         // create using issue
         final CustomerFeedback originalFeedback = TestCustomerFeedback.getRandomValid();
 
@@ -92,12 +102,14 @@ public class CustomerFeedbackTest {
         feedbackRepository.persist(originalFeedback);
         entityManager.flush();
 
+        // -- ACT --
         // delete issue
         supportIssueRepository.deleteById(currentIssueId);
         entityManager.flush();
 
+        // -- ASSERT --
         // check if feedback has been deleted as well
-        Assertions.assertNull(feedbackRepository.findById(originalFeedback.getId()));
+        assertNull(feedbackRepository.findById(originalFeedback.getId()));
     }
 
 

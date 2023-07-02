@@ -11,7 +11,6 @@ import de.benevolo.customer.support.entities.testdata.TestSupportIssueMessages;
 import de.benevolo.customer.support.entities.testdata.TestSupportIssues;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +25,7 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 public class AttachmentResourceTest {
@@ -47,7 +47,7 @@ public class AttachmentResourceTest {
         issueRepository.deleteAll();
     }
 
-    private Attachment uploadTestAttachment(final Attachment attachment, final int expectedStatusCode) {
+    private Attachment uploadTestAttachment(final Attachment attachment, final int expectedStatusCode) throws IOException {
 
         final InputStream fileStream = getClass().getResourceAsStream("/test.txt");
         final File file = new File(getClass().getResource("/test.txt").getFile());
@@ -60,6 +60,9 @@ public class AttachmentResourceTest {
                 .when().post("/support/attachment")
                 .then().statusCode(expectedStatusCode);
 
+        if (fileStream != null)
+            fileStream.close();
+
         return attachment;
     }
 
@@ -67,17 +70,21 @@ public class AttachmentResourceTest {
     @DisplayName("valid attachments should be uploaded")
     @Transactional
     public void uploadValidAttachment() throws IOException {
+        // -- ARRANGE --
         final Attachment initialAttachment = TestAttachments.getRandomValid();
+
+        // -- ACT --
         uploadTestAttachment(initialAttachment, 200);
 
+        // -- ASSERT --
         final Attachment fetchedAttachment = attachmentRepository.findById(initialAttachment.getId());
 
         // attachment location must have been updated
-        Assertions.assertNotEquals(fetchedAttachment.getLocation(), initialAttachment.getLocation());
+        assertNotEquals(fetchedAttachment.getLocation(), initialAttachment.getLocation());
         initialAttachment.setLocation(fetchedAttachment.getLocation());
 
-        Assertions.assertNotNull(fetchedAttachment);
-        Assertions.assertEquals(initialAttachment, fetchedAttachment);
+        assertNotNull(fetchedAttachment);
+        assertEquals(initialAttachment, fetchedAttachment);
 
         // assert that file has been uploaded and can be downloaded
         final byte[] fetchedFile = given().pathParam("id", initialAttachment.getId().toString())
@@ -87,47 +94,57 @@ public class AttachmentResourceTest {
         final String fetchedBytesAsString = new String(fetchedFile);
         final String expectedBytesAsString = new String(Files.readAllBytes(Paths.get(getClass().getResource("/test.txt").getPath())));
 
-        Assertions.assertEquals(expectedBytesAsString, fetchedBytesAsString);
+        assertEquals(expectedBytesAsString, fetchedBytesAsString);
     }
 
     @Test
     @DisplayName("invalid attachments should not be uploaded")
     @Transactional
-    public void uploadInvalidAttachment() {
+    public void uploadInvalidAttachment() throws IOException {
+        // -- ARRANGE --
         final Attachment attachment = TestAttachments.getRandomInvalid();
+
+        // -- ACT --
         uploadTestAttachment(attachment, 400);
 
+        // -- ASSERT --
         final Attachment fetchedAttachment = attachmentRepository.findById(attachment.getId());
 
-        Assertions.assertNull(fetchedAttachment);
+        assertNull(fetchedAttachment);
     }
 
     @Test
     @DisplayName("double UUID should be rejected")
     @Transactional
-    public void uploadDoubleAttachments() {
+    public void uploadDoubleAttachments() throws IOException {
+        // -- ARRANGE --
         final Attachment attachment1 = TestAttachments.getRandomValid();
         final Attachment attachment2 = TestAttachments.getRandomValid();
         attachment1.setId(attachment2.getId());
 
+        // -- ACT --
         uploadTestAttachment(attachment1, 200);
         uploadTestAttachment(attachment2, 409);
 
+        // -- ASSERT --
         final Attachment persistedAttachment = attachmentRepository.findById(attachment1.getId());
-        Assertions.assertNotNull(persistedAttachment);
+        assertNotNull(persistedAttachment);
     }
 
     @Test
     @DisplayName("removing loose attachment should work")
     public void removeLooseAttachment() {
+        // -- ARRANGE --
         final Attachment attachment = TestAttachments.getRandomValid();
         persistAttachment(attachment);
 
+        // -- ACT --
         given().pathParam("id", attachment.getId())
                 .when().delete("/support/attachment/{id}")
                 .then().statusCode(200);
 
-        Assertions.assertNull(fetchAttachment(attachment.getId()));
+        // -- ASSERT --
+        assertNull(fetchAttachment(attachment.getId()));
     }
 
     @Transactional
@@ -154,40 +171,48 @@ public class AttachmentResourceTest {
     @Test
     @DisplayName("removing a used attachment should not work")
     public void removeUsedAttachment() {
+        // -- ARRANGE --
         final SupportIssue issue = TestSupportIssues.getRandomValid();
         final SupportIssueMessage message = TestSupportIssueMessages.getRandomValid();
         final Attachment attachment = TestAttachments.getRandomValid();
 
         persistEntitiesConnected(issue, message, attachment);
 
+        // -- ACT --
         given().pathParam("id", attachment.getId())
                 .when().delete("/support/attachment/{id}")
                 .then().statusCode(409);
 
+        // -- ASSERT --
         final Attachment stillExistingAttachment = fetchAttachment(attachment.getId());
-        Assertions.assertNotNull(stillExistingAttachment);
+        assertNotNull(stillExistingAttachment);
     }
 
     @Test
     @DisplayName("getting existing attachment should work")
     public void getExistingAttachment() {
+        // -- ARRANGE --
         final Attachment attachment = TestAttachments.getRandomValid();
 
         persistAttachment(attachment);
 
+        // -- ACT --
         final Attachment returnedAttachment = given().pathParam("id", attachment.getId())
                 .when().get("/support/attachment/{id}")
                 .then().statusCode(200).and().extract().body().as(Attachment.class);
 
-        Assertions.assertNotNull(returnedAttachment);
-        Assertions.assertEquals(attachment, returnedAttachment);
+        // -- ASSERT --
+        assertNotNull(returnedAttachment);
+        assertEquals(attachment, returnedAttachment);
     }
 
     @Test
     @DisplayName("getting unknown attachment should not work")
     public void getUnknownAttachment() {
+        // -- ARRANGE --
         final UUID id = UUID.randomUUID();
 
+        // -- ACT & ASSERT --
         given().pathParam("id", id)
                 .when().get("/support/attachment/{id}")
                 .then().statusCode(410);
