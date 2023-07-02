@@ -34,7 +34,7 @@ public class TestAttachmentFileService implements AttachmentFileService {
     }
 
     @Override
-    public InputStream downloadAttachmentContent(final String location) throws Exception {
+    public InputStream downloadAttachmentContent(final String location) {
         final byte[] file = files.get(location);
         return new ByteArrayInputStream(file);
     }

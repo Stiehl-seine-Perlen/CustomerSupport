@@ -47,7 +47,7 @@ public class AttachmentResourceTest {
         issueRepository.deleteAll();
     }
 
-    private Attachment uploadTestAttachment(final Attachment attachment, final int expectedStatusCode) throws IOException {
+    private void uploadTestAttachment(final Attachment attachment, final int expectedStatusCode) throws IOException {
 
         final InputStream fileStream = getClass().getResourceAsStream("/test.txt");
         final File file = new File(getClass().getResource("/test.txt").getFile());
@@ -63,7 +63,6 @@ public class AttachmentResourceTest {
         if (fileStream != null)
             fileStream.close();
 
-        return attachment;
     }
 
     @Test

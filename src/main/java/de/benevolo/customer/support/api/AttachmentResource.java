@@ -109,6 +109,7 @@ public class AttachmentResource {
 
     @DELETE
     @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "deleted loose attachment",
             description = "The attachment is deleted, if it is not attached to any message and therefore unused")
     @APIResponses({
@@ -160,6 +161,7 @@ public class AttachmentResource {
 
     @GET
     @Path("{id}/download")
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "get content of attachment file",
             description = "Returns the attachment file content with the selected id")
     @APIResponses({
